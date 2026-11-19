@@ -6,7 +6,7 @@
 |---|---|
 | Manifest id | `active-review` |
 | Display name | Active Review |
-| Version | `0.1.0` |
+| Version | `2.0.0` |
 | Minimum Obsidian | `1.13.0` |
 | Desktop only | `false` |
 | Bundle entry | `src/main.ts` → `main.js` (CommonJS, ES2018) |

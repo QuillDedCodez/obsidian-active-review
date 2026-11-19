@@ -1,6 +1,6 @@
 # Preset Import & Export — Manage Questions and Session Configuration
 
-**Baseline checkpoint.** This document describes the preset transfer code in `obsidian-active-review/` at plugin version `0.1.0` (manifest id `active-review`, display name Active Review, `minAppVersion` `1.13.0`). It is verified against the current source tree; where an older description differs, the code wins.
+**Baseline checkpoint.** This document describes the preset transfer code in `obsidian-active-review/` at plugin version `2.0.0` (manifest id `active-review`, display name Active Review, `minAppVersion` `1.13.0`). It is verified against the current source tree; where an older description differs, the code wins.
 
 **Document authority.** This file owns the two JSON manifest formats, their validation, preview, apply, save, and undo behaviour. It does not own the note format (see [[01_Active Review Authoring Rule Book]]) and does not own session runtime semantics, storage layout, or overall architecture (see [[00_Active Review Plugin Workflow]]).
 
@@ -34,7 +34,7 @@ The only command is `open` (`Open quiz`). Import and export are UI actions insid
 | Preset ids (`preset-…`) | **no** | **no** |
 | Preset membership (which files) | yes, as review-relative paths | yes, as a Manage **name** |
 | Folder layout | yes (`folders[]`, `targetFolder`) | no |
-| Session configuration fields | no | yes (18 fields) |
+| Session configuration fields | no | yes (19 fields) |
 | Answer mode (`choice` / `typed`) | no | yes |
 | `showOnStart` | yes | yes (written, but not restored on import — see §10.2) |
 | `seed` | no | yes (part of config) |

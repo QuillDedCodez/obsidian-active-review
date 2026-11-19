@@ -4,11 +4,11 @@ The `active-review` code block turns any note **outside the review folder** into
 an embedded quiz session. It reuses the same presets, question pool, session
 engine, grading, timers, navigator, and session notes as the review tab.
 
-```markdown
+````markdown
 ```active-review
 sessionPreset: Exam Mode
 ```
-```
+````
 
 ---
 
@@ -34,11 +34,11 @@ auto-start: a session note is created only after **Start review** is pressed.
 
 Only one key is required:
 
-```markdown
+````markdown
 ```active-review
 sessionPreset: Daily 10
 ```
-```
+````
 
 `sessionPreset` accepts either:
 

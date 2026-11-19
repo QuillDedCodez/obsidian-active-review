@@ -1,7 +1,7 @@
 # Active Review — Authoring Rule Book
 
 > **Baseline checkpoint.**
-> This is the authoring contract for **Active Review** (`active-review` 0.1.0,
+> This is the authoring contract for **Active Review** (`active-review` 2.0.0,
 > minimum Obsidian 1.13.0). It describes what the shipped parser, session
 > builders, unit registry, and grader in `obsidian-active-review/src` actually
 > accept and do.
@@ -650,7 +650,7 @@ It does **not** run on:
 - the value expression of a quantity declaration (`x = … ; ; "J"`);
 - quantity arithmetic definitions (`F = m*a` with quantity operands).
 
-Those are evaluated by the quantity evaluator. An ambiguous quantity expression is not rejected by this criterion; group it explicitly.
+Those are evaluated by the quantity evaluator with the same power grouping and associativity rules. An ambiguous quantity expression is not rejected by this criterion; group it explicitly.
 
 ### 11.2 Rule
 
@@ -683,11 +683,25 @@ Every expression is parsed into a group tree, and every layer is checked indepen
 | `a/(b^c)`, `(a/b)^c` | base or whole power grouped |
 | `\frac{a}{b}`, `\frac{a}{b} \cdot d`, `\frac{b}{cd}` | LaTeX braces group the division |
 
-- A power chain is right-associative: `a^b^c` = `a^(b^c)`.
+- A power chain is right-associative: `a^b^c` = `a^(b^c)`. Braces or
+  parentheses around a single exponent are only a group, so `a^{b}` =
+  `a^(b)`:
+  - `2^2^2^2` = `2^(2^(2^2))` = `2^(2^4)` = `2^16` = 65536.
+  - `2^{2}^{2}^{2}` and `2^(2)^(2)^(2)` have the same value.
+- Grouping the **whole power** changes the sequence: `(a^b)^c` =
+  `a^(b*c)`.
+  - `((2^2)^2)^2` = `(2^2)^(2*2)` = `(2^2)^4` = `2^(2*4)` = `2^8` = 256.
+  - `(2^2)^2^2` is also 256: the grouped base is squared, then the right
+    chain applies to that result.
+- To select a different operation order, group explicitly: `2^(2^2^2)` =
+  65536, but `((2^2)^2)^2` = 256. In general, `a^(b^c)` keeps `b^c` as the
+  exponent, while `(a^b)^c` is `a^(b*c)`.
+- A sign in front of a power applies after the power: `-2^2` =
+  `-(2^2)` = -4, while `(-2)^2` = 4.
 - Everyday forms need braces: `a^{2} + b^{2}`, `I^{2}*R`, `v^{2}/r`, not
-`a^2 + b^2`, `I^2*R`, `v^2/r`.
+  `a^2 + b^2`, `I^2*R`, `v^2/r`.
 - Recursive layers are checked: `a^{b*c/d}` valid, `a^{b/c*d}` and
-`a^{b/c/d}` not.
+  `a^{b/c/d}` not.
 - Symbols must already be declared (`link()` name checks excepted). `e` and
 `\pi` are builtin constants.
 
