@@ -9,7 +9,7 @@ values, grades multiple-choice and typed answers (including numeric, text,
 multi-value, and quantity-aware answers), and writes local session history.
 
 - Plugin ID: `active-review` (never change it after release).
-- Version: `2.0.2`; minimum Obsidian version: `1.13.0`.
+- Version: `2.0.3`; minimum Obsidian version: `1.13.0`.
 - Entry point: `src/main.ts` → bundled to `main.js`.
 - Release artifacts: `main.js`, `manifest.json`, `styles.css`.
 - Local-only: no network requests, no telemetry, no remote code.

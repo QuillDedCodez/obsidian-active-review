@@ -347,9 +347,10 @@ note body. No fixture vault is required.
 
 - **Local-only:** the plugin makes no network requests, sends no telemetry,
   and loads no remote code. Everything happens inside the vault.
-- **Vault access:** the plugin enumerates vault file paths and reads Markdown
-  notes under the configured review folder to build the question pool. It also
-  writes session notes, the plugin cache, and settings inside the vault.
+- **Vault access:** the plugin enumerates all vault file paths to locate the
+  configured review and session folders. It reads Markdown note contents only
+  under the review folder when building the question pool. It also writes
+  session notes, the plugin cache, and settings inside the vault.
 - **Clipboard:** copy actions (for example, copying a warning list) write the
   requested text to the system clipboard through the browser Clipboard API.
   The plugin never reads the clipboard.

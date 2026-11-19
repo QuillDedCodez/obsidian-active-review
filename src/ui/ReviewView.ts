@@ -666,49 +666,84 @@ export class ReviewView extends ItemView {
         return this.sessions;
     }
 
-private renameFromHistory(
-    summary: SessionSummary,
-    hooks?: SessionActionHooks,
-): Promise<SessionSummary[]> {
-    return new Promise((resolve) => {
-        let settled = false;
-        const finish = async (): Promise<void> => {
-            if (settled) return;
-            settled = true;
-            await this.renderStart();
-            resolve(this.sessions);
-        };
-        openRenameSessionPrompt(this.app, {
-            initialName: summary.log.session_name,
-            onSave: async (name) => {
-                let ok = true;
-                try {
-                    await renameSession(this.app.vault, summary.file, name);
-                    await this.plugin.refreshSessionEntry(summary.file);
-                } catch (e) {
-                    ok = false;
-                    new Notice(`Rename failed: ${(e as Error).message}`);
+    /** True when this view is showing the given session file. */
+    private keepsSessionScreen(file: TFile): boolean {
+        return (
+            this.viewFile?.path === file.path ||
+            this.session?.file.path === file.path ||
+            this.session?.savedFile?.path === file.path
+        );
+    }
+
+    private renameFromHistory(
+        summary: SessionSummary,
+        hooks?: SessionActionHooks,
+    ): Promise<SessionSummary[]> {
+        return new Promise((resolve) => {
+            // Renaming from the quiz's completion panel or the read-only
+            // session view must not tear that screen down. The file path does
+            // not change on rename, so the current screen keeps its runtime.
+            const keepsCurrentView = this.keepsSessionScreen(summary.file);
+            let renamed = false;
+            let settled = false;
+            const finish = async (): Promise<void> => {
+                if (settled) return;
+                settled = true;
+                if (keepsCurrentView) {
+                    if (renamed) {
+                        try {
+                            this.sessions = await this.plugin.listSessions();
+                        } catch {
+                            // Keep the open screen even if the cache refresh fails.
+                        }
+                        if (!this.disposed && this.viewFile?.path === summary.file.path) {
+                            this.renderSessionView();
+                        }
+                    }
+                } else {
+                    await this.renderStart();
                 }
-                // A confirmed rename closes the session-detail view; the
-                // history list stays open and picks up the new name.
-                if (ok) hooks?.onLayerConfirm?.();
-                await finish();
-            },
-            onCancel: () => void finish(),
+                resolve(this.sessions);
+            };
+            openRenameSessionPrompt(this.app, {
+                initialName: summary.log.session_name,
+                onSave: async (name) => {
+                    let ok = true;
+                    try {
+                        await renameSession(this.app.vault, summary.file, name);
+                        await this.plugin.refreshSessionEntry(summary.file);
+                    } catch (e) {
+                        ok = false;
+                        new Notice(`Rename failed: ${(e as Error).message}`);
+                    }
+                    if (ok) {
+                        summary.log.session_name = name;
+                        renamed = true;
+                        // A confirmed rename closes only the session-detail
+                        // layer; the screen underneath stays.
+                        hooks?.onLayerConfirm?.();
+                    }
+                    await finish();
+                },
+                onCancel: () => void finish(),
+            });
         });
-    });
-}
+    }
 
     private deleteFromHistory(
         summary: SessionSummary,
         hooks?: SessionActionHooks,
     ): Promise<SessionSummary[]> {
         return new Promise((resolve) => {
+            // Cancelling or failing a delete leaves the completion panel or
+            // read-only session view underneath intact. Only a successful
+            // delete returns to the start screen.
+            const keepsCurrentView = this.keepsSessionScreen(summary.file);
             let settled = false;
-            const finish = async (): Promise<void> => {
+            const finish = async (deleted: boolean): Promise<void> => {
                 if (settled) return;
                 settled = true;
-                await this.renderStart();
+                if (deleted || !keepsCurrentView) await this.renderStart();
                 resolve(this.sessions);
             };
             new ConfirmModal(this.app, {
@@ -728,9 +763,9 @@ private renameFromHistory(
                     // session-detail view; cancelling closes only the delete
                     // modal, so `finish` keeps the detail view open.
                     if (ok) hooks?.onLayerConfirm?.();
-                    await finish();
+                    await finish(ok);
                 },
-                onCancel: () => void finish(),
+                onCancel: () => void finish(false),
             }).open();
         });
     }

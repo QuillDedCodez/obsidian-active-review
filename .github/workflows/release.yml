@@ -38,6 +38,14 @@ jobs:
           fi
           echo "name=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
 
+      # Fix the release name before the build so a later build/attestation
+      # failure cannot leave a version-less title behind.
+      - name: Set release name
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.name }}
+        run: gh release edit "$TAG" --title "Active Review $TAG"
+
       - name: Check out the release tag
         uses: actions/checkout@v4
         with:
@@ -80,4 +88,3 @@ jobs:
           TAG: ${{ steps.tag.outputs.name }}
         run: |
           gh release upload "$TAG" main.js manifest.json styles.css --clobber
-          gh release edit "$TAG" --title "Active Review $TAG"

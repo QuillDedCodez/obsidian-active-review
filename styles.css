@@ -109,7 +109,7 @@
 .rv-config-text:focus, .rv-config-number:focus, .rv-config-timer-input:focus, .rv-config-timer-warn:focus {
     border-color: var(--interactive-accent); outline: none;
 }
-.rv-config-number { width: 5.75em; }
+.rv-config-number.rv-config-number { width: 5.75em; }
 .rv-config-count { display: flex; gap: 0.625em; align-items: center; }
 .rv-config-hint { margin-top: 0.25em; font-size: 0.75em; color: var(--text-muted); }
 
