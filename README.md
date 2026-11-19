@@ -174,67 +174,144 @@ A wrong value is <<rv:value:d1>>.
 The anchor (`ans`) supplies the target type and unit; automatic pick/rand
 distractors are not affected.
 
+## Comprehensive example
+
+Distance problem (SI units): with given acceleration and a velocity equation, derive the distance equation for a time interval and evaluate the distance for the drawn time values. Calculus is shown in the explanation.
+
+`````markdown
+## DEFINITIONS
+
+```rv-def
+u = pick(4, 6, 8)
+a = rand(1, 3, 1)
+p = pick(1, 2, 3)
+d = pick(2, 3, 4)
+q = p + d
+U = u ; ; "m/s"
+A = a ; ; "m/s^2"
+P = p ; ; "s"
+Q = q ; ; "s"
+D = U * (Q - P) + 0.5 * A * (Q^(2) - P^(2))
+b = 100
+c = 125
+g = 150
+```
+
+## QUESTIONS
+A particle moves along a straight line with constant acceleration
+$a(t)=<<rv:val:a>>\ \text{m/s}^{2}$. Its velocity is
+$v(t)=<<rv:val:u>>+<<rv:val:a>>t$ in m/s. At
+$t=<<rv:val:p>>\ \text{s}$ the particle is at the origin, and it continues
+moving in the positive direction. Find the distance traveled from
+$t=<<rv:val:p>>\ \text{s}$ to $t=<<rv:val:q>>\ \text{s}$.
+
+## ANSWERS
+
+```rv-answer
+D:
+unit-mode = expanded
+display = atomic
+prefix-policy = any
+allowed-prefixes = auto
+min-sigfigs = 3
+max-sigfigs = 3
+unit-optional = false
+```
+
+<<rv:value:D>>
+
+## DISTRACTORS
+
+<<rv:val:b>>
+---
+<<rv:val:c>>
+---
+<<rv:val:g>>
+
+```rv-distract
+b, c, g <- D
+```
+
+## EXPLANATIONS
+Because $v(t)=<<rv:val:u>>+<<rv:val:a>>t$ is positive on the interval, the
+distance traveled equals the displacement:
+$$
+\Delta x=\int_{<<rv:val:p>>}^{<<rv:val:q>>}
+\left(<<rv:val:u>>+<<rv:val:a>>t\right)\,dt
+=<<rv:val:u>>\left(<<rv:val:q>>-<<rv:val:p>>\right)
++\frac{1}{2}<<rv:val:a>>\left(<<rv:val:q>>^{2}-<<rv:val:p>>^{2}\right)
+=<<rv:value:D>>.
+$$
+`````
+
+### How this example uses the plugin
+
+- **Definitions and randomization (`## DEFINITIONS`, `rv-def`)**: `pick` and `rand` draw the initial speed, acceleration, and time bounds each session; `q = p + d` computes the end time. `U`, `A`, `P`, and `Q` declare SI quantities (`m/s`, `m/s^2`, `s`), and `D = U * (Q - P) + 0.5 * A * (Q^(2) - P^(2))` converts the acceleration/velocity and time inputs into a distance equation and evaluates the distance for the drawn interval. `b`, `c`, and `g` provide base values for distractors.
+- **Question stem (`## QUESTIONS`)**: `<<rv:val:...>>` inserts the drawn values into the prose and LaTeX ($a(t)$, $v(t)$, and the interval), asking for the distance traveled from $t=p$ to $t=q$.
+- **Quantity answer and grading (`## ANSWERS`, `rv-answer`)**: the `D` binding sets an explicit grading/display policy (expanded unit forms, atomic display, SI prefix handling, 3 significant figures, unit required). `<<rv:value:D>>` is the accepted quantity answer, so equivalent unit forms are graded under that policy.
+- **Distractors (`## DISTRACTORS`, `rv-distract`)**: authored choices `<<rv:val:b>>`, `<<rv:val:c>>`, and `<<rv:val:g>>` are conditioned on `D` (`b, c, g <- D`), so they are interpreted in the answer’s quantity context when presented.
+- **Explanation with calculus (`## EXPLANATIONS`)**: explains that positive velocity makes distance equal displacement, integrates $v(t)$ over $[p,q]$ to derive the distance expression, substitutes the drawn values, and reports the evaluated result as `<<rv:value:D>>`.
+
+### Session display (one possible draw)
+
+With $u=4$, $a=3$, $p=1$, $d=3$ (so $q=4$), a session may show:
+
+**Question**
+
+> A particle moves along a straight line with constant acceleration $a(t)=3\ \text{m/s}^{2}$. Its velocity is $v(t)=4+3t$ in m/s. At $t=1\ \text{s}$ the particle is at the origin, and it continues moving in the positive direction. Find the distance traveled from $t=1\ \text{s}$ to $t=4\ \text{s}$.
+
+**Answer (typed)**: `34.5 m` (unit required, 3 significant figures; equivalent unit forms accepted per policy)
+
+**Choices (multiple choice, order may vary)**
+
+> - `34.5 m`
+> - `100 m`
+> - `125 m`
+> - `150 m`
+
+**Explanation (after submit)**
+
+> Because $v(t)=4+3t$ is positive on the interval, the distance traveled equals the displacement:
+> $$
+> \Delta x=\int_{1}^{4}\left(4+3t\right)\,dt
+> =4\left(4-1\right)+\frac{1}{2}3\left(4^{2}-1^{2}\right)
+> =34.5\ \text{m}.
+> $$
+
 ## Use
 
-Open the view from the ribbon or the **Open quiz** command. If an Active Review
-tab is already open, the plugin lists the open tabs and lets you switch or open
-another instance. Choose a session preset or configure presentation, count,
-order, submit mode, grading, timers, and pass score, then **Start New Session**.
-Pending sessions can be continued from Session history; completed sessions can
-be viewed, reproduced, archived, or deleted. Multiple tabs that open the same
-session file stay synchronized (choice, typed answer, scratch, flags, score,
-timers, and the one-at-a-time page); tabs on different session files run
-independently. Large sessions plan first, then stream question generation and
-card rendering in adaptive batches; the session timer stays paused until
-generation completes. Manage Questions selects the question pool by folder and
-saved presets. Question and session presets can be exported to and imported from
-JSON manifests, with a preview and an undo journal for Manage imports.
+Open the view from the ribbon or the **Open quiz** command. Choose a session preset (or configure presentation, count, order, grading, timers, and pass score), then **Start New Session**.
 
-Skipped Note and Warning Note panels list the notes that could not be parsed or
-that produced warnings. Each listed path is a link that opens the note in a new
-tab, and each panel has a copy icon (the same one Obsidian uses on code blocks)
-that copies the whole list as Markdown with `[[wiki links]]` — handy for pasting
-into an AI agent or an issue report.
+**Session history** lets you continue pending sessions or view, reproduce, archive, and delete completed ones. Tabs on the same session file stay synchronized; different session files run independently.
+
+**Manage Questions** selects the pool by folder and saved presets. Question and session presets can be exported/imported as JSON (with preview and an undo journal for Manage imports).
+
+**Skipped Note** and **Warning Note** panels list notes that could not be parsed or produced warnings. Each path opens the note, and the copy icon copies the list as Markdown with `[[wiki links]]`.
 
 ### Index and rescanning
 
-The plugin keeps a compressed index of the parsed notes and sessions in
-`<plugin folder>/cache/index.json.gz`. Opening Obsidian reads that index instead
-of scanning the vault, so startup stays fast as the vault grows. **Rescan notes**
-is the only full scan: it reparses every quiz note and session note and rewrites
-the index. Editing, adding, renaming, or deleting a note in the review folder
-updates just that entry. If no index exists yet (first install or an update), the
-plugin builds one automatically once.
+The plugin keeps a compressed index in `<plugin folder>/cache/index.json.gz`, so startup does not rescan the vault. Edits in the review folder update only that entry.
 
-## Install / develop
+**Rescan notes** performs a full reparse and rewrites the index (run automatically once if no index exists).
 
-- Manual: copy `main.js`, `manifest.json`, and `styles.css` into
+## Install / build
+
+- Manual install: copy `main.js`, `manifest.json`, and `styles.css` into
   `<vault>/.obsidian/plugins/active-review/`, then enable the plugin.
-- Develop on Windows, macOS, or Linux: install Node.js 18 or newer, then run
-  `npm ci` once. The committed lockfile pins every dependency and `.npmrc`
-  blocks install scripts, so `npm ci` is preferred over `npm install`. The
-  build script is cross-platform, so the same commands work in PowerShell,
-  Command Prompt, and a POSIX shell.
+- Build from source (Windows, macOS, or Linux): install Node.js 18 or newer,
+  then run `npm ci` once. The committed lockfile pins dependencies and `.npmrc`
+  blocks install scripts.
 
 | Command | Action |
 |---|---|
 | `npm run dev` | esbuild watch mode with inline source maps |
-| `npm run build` | Audit, type-check, lint, test, bundle, then sync the submission folder |
-| `npm run build -- --clean` | Reinstall from the lockfile first, then run the full build |
-| `npm run build -- --no-sync` | Full verified build in place, without syncing |
+| `npm run build` | Audit, type-check, lint, test, and bundle `main.js` |
 | `npm run verify` | Type-check, lint, and run the test suite |
 | `npm run typecheck` | Type-check only |
 | `npm run lint` | ESLint over `src` |
-| `npm test` | Compile `src` + `tests` and run the test harness (cross-platform) |
+| `npm test` | Compile `src` + `tests` and run the test harness |
 
-`main.js` is generated by `npm run build`; edit files under `src/`. In the
-development checkout, the build also refreshes the sibling
-`obsidian-active-review/` folder with the generated bundle, sources, tests, and
-build configuration; set `OUT_DIR` to override.
-Inside the submission folder `npm run build` runs its own trimmed
-`scripts/build-submission.mjs`, which verifies, tests, bundles, and checks the
-artifacts in place but never copies files to another folder. Syncing and docs
-management are development-only steps and are not shipped.
+`main.js` is generated by `npm run build`; edit files under `src/`.
 
 The test harness compiles into `tests/.build`, stubs the types-only `obsidian`
 package, and runs sync and async tests. It covers section parsing and
