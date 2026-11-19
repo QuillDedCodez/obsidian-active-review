@@ -1,8 +1,1778 @@
-/*
+/* ============================================================
+   Active Review — Refactored & Optimized Styles
+   ============================================================ */
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* ---------- 1. Variables & Base ---------- */
+:root {
+    --rv-r-s: 0.25em;
+    --rv-r-m: 0.5em;
+    --rv-r-l: 0.75em;
+    --rv-r-pill: 999px;
+    --rv-bw: 1px;
+    --rv-bw-ring: 2px;
+    --rv-dur: 150ms;
+    --rv-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
 
-If your plugin does not need CSS, delete this file.
+.rv-root {
+    --rv-correct: var(--color-green, #4caf50);
+    --rv-wrong:   var(--color-red, #e74c3c);
+    padding: 0 max(min(1.5em, 3%), calc((100% - 48.75em) / 2)) 2.5em;
+    overflow-wrap: anywhere;
+    overflow-x: clip;
+    font-size: var(--font-text-size, 1em) !important;
+    line-height: 1.6;
+    color: var(--text-normal);
+    isolation: isolate;
+    padding-top: 0 !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
 
-*/
+.rv-root h2 { font-size: var(--h2-size, 1.6em); font-weight: 700; text-align: center; margin: 0 0 0.5em; }
+.rv-root h4 { font-size: var(--h4-size, 1.1em); text-align: center; font-weight: 600; margin: 1.25em 0 0.625em; }
+.rv-root p.rv-muted { text-align: center; color: var(--text-muted); font-size: 0.875em; margin: 0 0 1.25em; }
+.rv-hidden { display: none !important; }
+.rv-md > *:first-child { margin-top: 0; }
+.rv-md > *:last-child { margin-bottom: 0; }
+.rv-md p { margin: .25em 0; }
+.rv-md pre, .rv-md pre code { white-space: pre-wrap; }
+.rv-md img { max-width: 100%; height: auto; }
+.rv-md table { display: block; max-width: 100%; overflow-x: auto; }
+.rv-md .math-block { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+
+/* ---------- 2. Shared Controls (Buttons, Inputs, Chips) ---------- */
+.rv-modes { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5em; margin: 0 0 1.25em; }
+.rv-advanced-check { display: inline-flex; align-items: center; gap: 0.375em; color: var(--text-normal); font-size: 0.8125em; cursor: pointer; }
+.rv-advanced-check input { flex: none; margin: 0; cursor: pointer; }
+.rv-mode {
+    display: inline-flex; align-items: center; justify-content: center; height: auto;
+    min-height: 2.75em; padding: 0.625em 1.25em; border-radius: 0.5em;
+    border: 1.5px solid var(--background-modifier-border);
+    background: var(--background-secondary); color: var(--text-normal);
+    font-size: 0.9375em; line-height: 1.2; text-align: center; cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color .15s, background .15s, color .15s;
+}
+.rv-mode:hover:not(:disabled) { border-color: var(--interactive-accent); background: var(--background-modifier-hover); }
+.rv-mode.is-active { background: var(--interactive-accent); border-color: var(--interactive-accent); color: var(--text-on-accent); font-weight: 600; }
+.rv-mode:disabled { opacity: .5; cursor: not-allowed; }
+
+.rv-chip-row-toggle {
+    display: inline-flex; align-items: center; justify-content: center; height: auto;
+    min-height: 2.75em; padding: 0.625em 1.25em; border-radius: 0.5em;
+    border: 1.5px dashed var(--background-modifier-border);
+    background: transparent; color: var(--text-muted); font-size: 0.9375em;
+    line-height: 1.2; box-sizing: border-box; cursor: pointer; 
+    transition: border-color .15s, background .15s, color .15s;
+}
+.rv-chip-row-toggle:hover { border-color: var(--interactive-accent); background: var(--background-modifier-hover); color: var(--text-normal); }
+
+.rv-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 0.625em; margin: 1.25em 0; }
+.rv-actions button, .rv-modal-actions button {
+    display: inline-flex; align-items: center; justify-content: center; height: auto;
+    min-height: 2.75em; padding: 0.625em 1.375em; border-radius: 0.5em;
+    border: 1.5px solid var(--background-modifier-border);
+    background: var(--background-secondary); color: var(--text-normal);
+    font-size: 0.9375em; line-height: 1.2; text-align: center; box-sizing: border-box; cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.rv-actions button:hover:not(:disabled), .rv-modal-actions button:hover {
+    background: var(--background-modifier-hover); border-color: var(--interactive-accent);
+}
+.rv-actions button.mod-cta, .rv-modal-actions button.mod-cta {
+    background: var(--interactive-accent); border-color: var(--interactive-accent);
+    color: var(--text-on-accent); font-weight: 600;
+}
+.rv-actions button.mod-cta:hover:not(:disabled), .rv-modal-actions button.mod-cta:hover {
+    background: var(--interactive-accent-hover);
+}
+.rv-back {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.375em; height: auto;
+    min-height: 2.25em; padding: 0.375em 0.875em; border-radius: 0.5em; border: 1.5px solid var(--background-modifier-border);
+    background: var(--background-secondary); color: var(--text-normal);
+    font-size: 0.75em; font-weight: 500; line-height: 1.2; text-align: center; box-sizing: border-box; cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.rv-back:hover { background: var(--background-modifier-hover); border-color: var(--interactive-accent); }
+
+.rv-config-label { display: block; font-weight: 600; font-size: 0.875em; margin-bottom: 0.375em; color: var(--text-normal); }
+.rv-config-text, .rv-config-number, .rv-config-timer-input, .rv-config-timer-warn {
+    width: 100%; padding: 0.5em 0.625em; border: 1.5px solid var(--background-modifier-border);
+    border-radius: 0.5em; background: var(--background-primary); color: var(--text-normal);
+    font-family: inherit; box-sizing: border-box; min-height: 2.375em; font-size: 1em !important;
+}
+.rv-config-text:focus, .rv-config-number:focus, .rv-config-timer-input:focus, .rv-config-timer-warn:focus {
+    border-color: var(--interactive-accent); outline: none;
+}
+.rv-config-number { width: 5.75em; }
+.rv-config-count { display: flex; gap: 0.625em; align-items: center; }
+.rv-config-hint { margin-top: 0.25em; font-size: 0.75em; color: var(--text-muted); }
+
+/* ---------- 3. Start Screen Layout ---------- */
+/* The ItemView's content element *is* `.rv-root.rv-start-mode` (see
+   ReviewView.onOpen), so match it directly. Matching a descendant `.rv-root`
+   left core's mobile view padding in place and produced a dead strip below the
+   scroll area (the content never reached the floating navbar). */
+.workspace-leaf-content[data-type="active-review-view"] .view-content.rv-root.rv-start-mode {
+    padding: 0; overflow: hidden;
+}
+.rv-root.rv-start-mode {
+    display: flex; flex-direction: column; height: 100%; box-sizing: border-box; overflow: hidden; padding: 0;
+}
+.rv-root.rv-start-mode .rv-start-body {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden;
+    padding: 0 max(1em, calc((100% - 75em) / 2)) 3em; box-sizing: border-box;
+    scroll-padding-top: 1.5em;
+    /* PREVENT NATIVE SCROLL ANCHORING JUMP ON PRESET RE-RENDER */
+    overflow-anchor: none;
+}
+.rv-start-mode .rv-start-header {
+    position: relative; flex: 0 0 auto; display: flex; align-items: flex-end; justify-content: space-between;
+    flex-wrap: wrap; gap: 0.75em 1.5em; padding: 0.5em max(1em, calc((100% - 75em) / 2)) 0.75em;
+    margin: 0; background: var(--background-primary); border-bottom: 1px solid var(--background-modifier-border);
+    transition: box-shadow var(--rv-dur, 150ms) ease; z-index: 20;
+}
+.rv-start-mode .rv-start-header.is-scrolled { box-shadow: 0 4px 8px -4px rgba(0, 0, 0, 0.18); }
+.rv-start-mode .rv-start-header h2 { flex: 1 1 16em; margin: 0; text-align: left; font-size: clamp(1.45em, 2vw, 1.85em); line-height: 1.2; letter-spacing: -0.01em; }
+.rv-start-mode .rv-start-actions { flex: 0 1 auto; margin: 0; justify-content: flex-end; gap: 0.5em; }
+.rv-start-mode .rv-start-actions button { min-height: 2.5em; height: auto; padding: 0.5em 1.125em; font-size: 0.875em; }
+
+.rv-start-mode .rv-start-status { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25em 1em; margin: 1.125em 0; color: var(--text-muted); font-size: 0.875em; }
+.rv-start-mode .rv-start-status p, .rv-start-mode .rv-start-status p.rv-muted { margin: 0; text-align: left; }
+.rv-start-mode h3 { margin: 0 0 0.625em; font-size: 1.02em; font-weight: 600; line-height: 1.3; color: var(--text-normal); }
+
+.rv-start-mode .rv-start-section { margin-bottom: 1.375em; min-width: 0; }
+.rv-start-mode .rv-start-section-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75em; margin-bottom: 0.625em; }
+.rv-start-mode .rv-start-section-head h3 { margin: 0; }
+.rv-start-head-actions { display: flex; align-items: center; gap: 0.5em; margin-left: auto; }
+.rv-link-button { 
+    display: inline-flex; align-items: center; justify-content: center; height: auto; 
+    min-height: 1.75em; padding: 0.25em 0.625em; border-radius: 0.375em; 
+    background: none; border: none; color: var(--text-accent); 
+    font-size: 0.875em; line-height: 1.2; box-sizing: border-box; cursor: pointer; 
+    transition: background .15s;
+}
+.rv-link-button:hover { background: var(--background-modifier-hover); text-decoration: none; }
+
+.rv-start-mode .rv-sessions, .rv-start-mode .rv-issues, .rv-start-mode .rv-warnings {
+    max-width: none; margin: 0; padding: 0; border-radius: 0.625em; box-sizing: border-box;
+    scroll-margin-top: 1.5em;
+    background: var(--background-secondary); border: 1px solid var(--background-modifier-border);
+    color: var(--text-muted); font-size: 0.875em; overflow: visible;
+}
+.rv-start-mode .rv-sessions > summary, .rv-start-mode .rv-issues > summary, .rv-start-mode .rv-warnings > summary {
+    padding: 0.75em 1em; background: var(--background-secondary); border-radius: 0.625em;
+    cursor: pointer; color: var(--text-normal); font-weight: 600; font-size: 0.875em;
+    position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 0 transparent; transition: box-shadow 0.2s, border-radius 0.2s;
+}
+.rv-start-mode .rv-sessions[open] > summary, .rv-start-mode .rv-issues[open] > summary, .rv-start-mode .rv-warnings[open] > summary {
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0;
+    border-bottom: 1px solid var(--background-modifier-border); box-shadow: 0 1px 0 0 var(--background-modifier-border);
+}
+.rv-start-mode .rv-sessions-body { padding: 0.75em 1em 1em; margin: 0; }
+
+.rv-start-mode .rv-start-alerts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1em 1.25em; margin-bottom: 1.375em; align-items: start; }
+.rv-start-mode .rv-start-alerts > .rv-start-section { margin: 0; }
+.rv-start-mode .rv-start-alerts > .rv-start-section:only-child { grid-column: 1 / -1; }
+
+/* ---------- 4. Start Screen: Session List & Presets ---------- */
+.rv-start-mode .rv-sessions-toggle { display: flex; gap: 0.375em; margin-bottom: 0.75em; }
+.rv-start-mode .rv-sessions-toggle .rv-mode { min-height: 1.75em; height: auto; padding: 0.25em 0.75em; font-size: 0.75em; }
+
+.rv-start-mode .rv-sessions-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.5em; margin-top: 0.75em; }
+.rv-start-mode .rv-sessions-list > .rv-muted { grid-column: 1 / -1; }
+
+.rv-start-mode .rv-session-row {
+    display: flex; gap: 0.5em; align-items: center; text-align: left; min-height: 2.375em; height: auto; padding: 0.5em 0.75em;
+    background: var(--background-secondary); border: 1px solid var(--background-modifier-border);
+    border-radius: 0.375em; color: var(--text-normal); font: inherit; font-size: 0.75em; cursor: pointer; width: 100%;
+    transition: border-color .15s, background .15s;
+}
+.rv-start-mode .rv-session-row:hover { border-color: var(--interactive-accent); background: var(--background-modifier-hover); }
+
+.rv-start-mode .rv-session-row .rv-session-status {
+    display: inline-flex; align-items: center; flex: none; margin-right: 0.5em;
+    padding: 0.125em 0.5em; border-radius: var(--rv-r-pill, 999px);
+    font-size: 0.5625em; font-weight: var(--font-semibold, 600); letter-spacing: 0.02em; text-transform: none;
+}
+.rv-start-mode .rv-session-row .rv-session-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-start-mode .rv-session-row .rv-session-progress { flex: none; margin-right: 0.5em; color: var(--text-muted); }
+.rv-start-mode .rv-session-row .rv-session-flags { flex: none; color: var(--text-faint); }
+
+.rv-start-mode .rv-sessions-more {
+    display: inline-flex; align-items: center; justify-content: center;
+    grid-column: 1 / -1; justify-self: center; 
+    min-height: 2em; height: auto; padding: 0.375em 1em;
+    border: 1.5px solid var(--background-modifier-border); border-radius: 0.5em;
+    background: var(--background-secondary);
+    color: var(--text-muted); font-size: 0.75em;
+    cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+}
+.rv-start-mode .rv-sessions-more:hover {
+    border-color: var(--interactive-accent); background: var(--background-modifier-hover); color: var(--text-normal);
+}
+
+.rv-start-mode .rv-session-presets {
+    display: flex; flex-direction: column; align-items: stretch; gap: 0.375em;
+    margin: 0 0 0.75em; padding: 0.625em 0.875em; border: 1px solid var(--background-modifier-border);
+    border-radius: 0.625em; background: var(--background-secondary);
+}
+.rv-start-mode .rv-session-presets .rv-config-label { flex: 0 0 auto; margin: 0; font-size: 0.75em; font-weight: 600; letter-spacing: 0.045em; text-transform: uppercase; color: var(--text-muted); }
+.rv-session-preset-row { display: flex; flex-wrap: wrap; gap: 0.375em; align-items: center; min-width: 0; max-width: 100%; }
+.rv-session-preset-row > * { flex: 0 0 auto; }
+.rv-start-mode .rv-session-preset-row .rv-mode { 
+    display: inline-flex; align-items: center; justify-content: center; height: auto;
+    min-height: 2em; padding: 0.3125em 0.75em; font-size: 0.875em; line-height: 1.2; box-sizing: border-box;
+}
+.rv-start-mode .rv-session-preset-row .rv-chip-row-toggle { 
+    display: inline-flex; align-items: center; justify-content: center; height: auto;
+    min-height: 2em; padding: 0.3125em 0.75em; border-radius: 0.4375em; font-size: 0.875em; line-height: 1.2; box-sizing: border-box;
+}
+.rv-session-preset-save { font-weight: 600; color: var(--text-accent); }
+.rv-session-preset-row-actions { margin-top: 0.375em; padding-top: 0.375em; border-top: 1px solid var(--background-modifier-border); }
+
+.rv-preset-head { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 0.625em; }
+.rv-preset-head .rv-config-label { margin: 0; }
+.rv-preset-head .rv-back { min-height: 2em; height: auto; padding: 0.25em 0.75em; font-size: 0.75em; line-height: 1.2; box-sizing: border-box; }
+
+/* ---------- 5. Start Screen: Session Config Grid ---------- */
+.rv-start-mode .rv-session-config {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.125em 1.75em; padding: 1.375em 1.5em; border-radius: 0.75em;
+    background: var(--background-secondary); border: 1px solid var(--background-modifier-border); margin: 0 0 1.125em;
+}
+/* Reorder the session config items */
+.rv-start-mode .rv-session-config > * { order: 3; }
+.rv-start-mode .rv-session-config > .rv-config-row.rv-span-2:first-child { order: 1; }
+.rv-start-mode .rv-session-config > .rv-manage-presets { order: 2; }
+
+.rv-start-mode .rv-session-config > .rv-config-row, .rv-start-mode .rv-session-config > .rv-config-field, .rv-start-mode .rv-session-config > .rv-timer-config { margin: 0; min-width: 0; }
+.rv-start-mode .rv-session-config .rv-span-2 { grid-column: 1 / -1; }
+.rv-start-mode .rv-session-config > .rv-config-hint { grid-column: 1 / -1; }
+.rv-start-mode .rv-session-config .rv-config-field { display: flex; flex-direction: column; gap: 0.75em; }
+.rv-start-mode .rv-session-config .rv-config-field .rv-config-row { margin: 0; }
+.rv-start-mode .rv-config-row { margin-bottom: 0.875em; }
+.rv-start-mode .rv-config-row:last-child { margin-bottom: 0; }
+.rv-start-mode .rv-config-row .rv-modes { justify-content: flex-start; gap: 0.375em; margin: 0; }
+.rv-start-mode .rv-config-row .rv-mode { flex: 1 1 auto; min-height: 2.375em; height: auto; padding: 0.4375em 0.75em; border-radius: 0.4375em; font-size: 0.875em; line-height: 1.2; white-space: nowrap; box-sizing: border-box; }
+.rv-start-mode .rv-config-row .rv-chip-row-toggle { flex: 1 1 auto; min-height: 2.375em; height: auto; padding: 0.4375em 0.75em; border-radius: 0.4375em; font-size: 0.875em; line-height: 1.2; box-sizing: border-box; }
+
+/* Two-column pairs block: keeps Answer Mode / Presentation / No of Questions /
+   Submit on the left and their right-hand partners on the right. Explicit rows
+   leave the right-column gap reserved when No. of Choices or Trim method are
+   hidden, so later controls never shift up into the gap. */
+.rv-start-mode .rv-config-pairs {
+    grid-column: 1 / -1;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.125em 1.75em; min-width: 0;
+}
+.rv-start-mode .rv-config-pairs > * { margin: 0; min-width: 0; }
+.rv-start-mode .rv-config-pairs > .rv-config-mode { grid-column: 1; grid-row: 1; }
+.rv-start-mode .rv-config-pairs > .rv-config-choice { grid-column: 2; grid-row: 1; }
+.rv-start-mode .rv-config-pairs > .rv-config-pres { grid-column: 1; grid-row: 2; }
+.rv-start-mode .rv-config-pairs > .rv-config-order { grid-column: 2; grid-row: 2; }
+.rv-start-mode .rv-config-pairs > .rv-config-numq { grid-column: 1; grid-row: 3; }
+.rv-start-mode .rv-config-pairs > .rv-config-trim { grid-column: 2; grid-row: 3; }
+.rv-start-mode .rv-config-pairs > .rv-config-submit { grid-column: 1; grid-row: 4; }
+.rv-start-mode .rv-config-pairs > .rv-config-grade { grid-column: 2; grid-row: 4; }
+
+.rv-session-config input.rv-config-slider {
+    flex: 1; min-width: 6.25em; height: 2.75em; padding: 0; border: none; box-sizing: border-box;
+    -webkit-appearance: none; appearance: none; background: transparent;
+    accent-color: var(--interactive-accent); touch-action: pan-y; user-select: none !important; cursor: pointer;
+}
+.rv-session-config input.rv-config-slider:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 0.125em; border-radius: 0.375em; }
+.rv-session-config input.rv-config-slider::-webkit-slider-runnable-track {
+    height: 0.375em; border-radius: 99px;
+    background: linear-gradient(to right, var(--interactive-accent) 0%, var(--interactive-accent) var(--rv-slider-progress, 0%), var(--background-modifier-border) var(--rv-slider-progress, 0%), var(--background-modifier-border) 100%);
+}
+/* Core positions range thumbs with `top: var(--slider-thumb-y)` (a negative
+   offset tuned for its own 6px track + 24px thumb). Our larger track/thumb
+   combination must cancel that offset, or the thumb floats above the track on
+   Android and the track looks sliced. Centre the thumb on the track instead. */
+.rv-session-config input.rv-config-slider::-webkit-slider-thumb { -webkit-appearance: none; position: relative; top: 0; width: 1.375em; height: 1.375em; margin-top: calc((0.375em - 1.375em) / 2); background: var(--text-on-accent, #fff); border: none; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); cursor: pointer; }
+.rv-session-config input.rv-config-slider::-moz-range-track { height: 0.375em; background: var(--background-modifier-border); border-radius: 99px; }
+.rv-session-config input.rv-config-slider::-moz-range-progress { height: 0.375em; background: var(--interactive-accent); border-radius: 99px; }
+.rv-session-config input.rv-config-slider::-moz-range-thumb { width: 1.375em; height: 1.375em; background: var(--text-on-accent, #fff); border: none; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); cursor: pointer; }
+
+.rv-timer-config { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.875em 1.75em; margin: 0; }
+.rv-timer-config h4 { grid-column: 1 / -1; margin: 0.25em 0 0; padding-top: 0.875em; border-top: 1px solid var(--background-modifier-border); font-size: 0.98em; text-align: left; }
+.rv-timer-config h4:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+.rv-timer-row { display: flex; align-items: center; gap: 0.5em; flex-wrap: wrap; min-width: 0; margin: 0; align-content: start; }
+.rv-timer-row .rv-config-label { margin: 0; min-width: 6em; white-space: nowrap; }
+.rv-timer-warn { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 0.25em; color: var(--text-muted); font-size: 0.875em; white-space: nowrap; }
+.rv-timer-warn > span { flex: 0 0 auto; }
+.rv-timer-warn .rv-config-timer-warn { flex: 0 0 auto; width: 5.5em; }
+.rv-timer-warning-note { grid-column: 1 / -1; color: var(--text-warning, #d19a00); font-size: 0.875em; margin: 0.25em 0 0; }
+.rv-timer-config .rv-timer-row .rv-mode { min-width: 3.375em; }
+.rv-timer-config .rv-stopwatch-row .rv-modes { flex: 1 1 auto; }
+.rv-timer-config .rv-stopwatch-row .rv-mode { flex: 1 1 0; min-width: 4em; }
+
+/* ---------- 6. Quiz Screen (Active Session) ---------- */
+.rv-head {
+    position: sticky; top: 0; z-index: 10; background: var(--background-primary);
+    padding: 1.25em 0 1.5em; margin-bottom: 0; box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+}
+.rv-head-row { display: flex; justify-content: space-between; align-items: center; gap: 0.5em; flex-wrap: wrap; margin-bottom: 0.5em; }
+.rv-head-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5em; align-items: center; margin-left: auto; }
+.rv-submit-all { min-height: 2.25em; height: auto; padding: 0.375em 0.875em; border-radius: 0.5em; font-size: 0.75em; }
+.rv-status { text-align: center; color: var(--text-muted); font-size: 0.875em; font-weight: 600; margin-bottom: 0.5em; }
+.rv-status.rv-score-pass { color: var(--rv-correct); }
+.rv-status.rv-score-fail { color: var(--rv-wrong); }
+.rv-bar { height: 0.375em; background: var(--background-modifier-border); border-radius: 99px; overflow: hidden; }
+.rv-bar-fill { height: 100%; width: var(--rv-progress, 0%); background: var(--interactive-accent); border-radius: 99px; transition: width .3s ease; }
+
+.rv-session-timers { display: flex; flex-wrap: wrap; gap: 0.625em; margin-top: 0.25em; }
+.rv-session-timer, .rv-session-stopwatch, .rv-q-timer, .rv-q-stopwatch {
+    padding: 0.125em 0.5em; border: 1px solid var(--background-modifier-border); border-radius: 999px;
+    background: var(--background-secondary); color: var(--text-muted);
+    font-size: 0.875em; font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.rv-session-timer.is-warning, .rv-q-timer.is-warning { border-color: var(--text-error); color: var(--text-error); }
+.rv-q-timers { display: flex; gap: 0.375em; margin-left: auto; align-items: center; }
+
+.rv-nav-row { display: flex; justify-content: space-between; gap: 0.5em; margin: 0.5em 0 0; align-items: center; }
+.rv-nav-group-left { display: flex; gap: 0.5em; align-items: center; flex: 0 0 auto; }
+.rv-nav-group-right { display: flex; gap: 0.5em; align-items: center; margin-left: auto; flex: 0 0 auto; }
+/* Definite horizontal padding: a percentage here resolves against the
+   shrink-to-fit nav group, which collapsed the Next button. */
+.rv-nav { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; min-height: 2.75em; height: auto; padding: 0.625em 1.25em; border-radius: 0.5em; border: 1.5px solid var(--background-modifier-border); background: var(--background-secondary); color: var(--text-normal); font-size: 0.9375em; line-height: 1.2; text-align: center; box-sizing: border-box; cursor: pointer; transition: background .15s, border-color .15s, opacity .15s; }
+.rv-nav:hover:not(:disabled) { background: var(--background-modifier-hover); border-color: var(--interactive-accent); }
+.rv-nav:disabled { opacity: .4; cursor: not-allowed; }
+.rv-nav-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75em; height: auto; padding: 0.625em 1em; border: 1.5px solid var(--background-modifier-border); border-radius: 0.5em; background: var(--background-secondary); color: var(--text-normal); font-size: 0.875em; line-height: 1.2; text-align: center; box-sizing: border-box; cursor: pointer; }
+.rv-nav-toggle.is-active { border-color: var(--interactive-accent); color: var(--interactive-accent); }
+
+.rv-quiz-layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.125em; align-items: start; }
+.rv-quiz-layout.has-navigator { grid-template-columns: 11.875em minmax(0, 1fr); }
+.rv-navigator { position: sticky; top: 11em; align-self: start; padding: 0.625em; border: 1px solid var(--background-modifier-border); border-radius: 0.625em; background: var(--background-secondary); max-height: calc(100dvh - 12.5em); display: flex; flex-direction: column; }
+.rv-nav-title { flex: 0 0 auto; margin: 0 0 0.625em; font-size: 1.1em; font-weight: 600; }
+/* The generic .rv-root h4 margin would otherwise push the title down and
+   leave the mobile cell grid with almost no height. */
+.rv-root .rv-navigator .rv-nav-title { margin: 0 0 0.5em; }
+.rv-nav-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.25em; overflow-y: auto; align-content: start; flex: 1 1 auto; padding-right: 0.25em; margin-bottom: 0.5em; }
+.rv-nav-cell { 
+    position: relative; display: inline-flex; align-items: center; justify-content: center; 
+    min-width: 2.25em; min-height: 2.25em; height: auto; padding: 0.125em; 
+    border: 1.5px solid var(--background-modifier-border); border-radius: 0.4375em; 
+    background: var(--background-primary); color: var(--text-muted); 
+    font-size: 0.6875em; font-weight: 600; line-height: 1.2; text-align: center; 
+    box-sizing: border-box; cursor: pointer; 
+}
+.rv-nav-cell:hover { border-color: var(--interactive-accent); color: var(--text-normal); }
+.rv-nav-cell.is-current { border-color: var(--interactive-accent); box-shadow: 0 0 0 1.5px var(--interactive-accent) inset; color: var(--text-normal); }
+.rv-nav-cell.rv-nav-correct { border-color: var(--rv-correct); background: var(--background-modifier-success); color: var(--text-normal); }
+.rv-nav-cell.rv-nav-wrong { border-color: var(--rv-wrong); background: var(--background-modifier-error); color: var(--text-normal); }
+.rv-nav-cell.rv-nav-submitted { border-color: var(--text-muted); background: var(--background-modifier-hover); }
+.rv-nav-cell.rv-nav-in-progress { border-style: dashed; border-color: var(--text-warning, #d19a00); }
+.rv-nav-cell.rv-nav-loading { border-style: dotted; color: var(--text-faint); }
+.rv-nav-cell.rv-nav-skipped { border-style: dashed; border-color: var(--background-modifier-border); color: var(--text-faint); opacity: 0.6; }
+.rv-nav-flag { position: absolute; top: -0.25em; right: -0.25em; display: inline-flex; align-items: center; justify-content: center; width: 0.875em; height: 0.875em; border-radius: 50%; background: var(--text-warning, #d19a00); color: var(--text-on-accent, #fff); font-size: 0.5625em; font-weight: 800; line-height: 1; }
+.rv-nav-legend { display: flex; flex-wrap: wrap; gap: 0.25em 0.5em; margin-top: 0.5em; color: var(--text-faint); font-size: 0.5625em; }
+.rv-nav-legend-item { display: inline-flex; align-items: center; gap: 0.1875em; }
+.rv-nav-legend-dot { width: 0.4375em; height: 0.4375em; border: 1px solid var(--background-modifier-border); border-radius: 50%; background: var(--background-primary); }
+.rv-legend-correct .rv-nav-legend-dot { border-color: var(--rv-correct); background: var(--rv-correct); }
+.rv-legend-wrong .rv-nav-legend-dot { border-color: var(--rv-wrong); background: var(--rv-wrong); }
+.rv-legend-submitted .rv-nav-legend-dot { background: var(--background-modifier-hover); }
+.rv-legend-loading .rv-nav-legend-dot { border-style: dotted; }
+.rv-legend-skipped .rv-nav-legend-dot { border-style: dashed; opacity: 0.6; }
+.rv-legend-flagged .rv-nav-legend-dot { border-color: transparent; background: var(--text-warning, #d19a00); }
+
+/* ---------- 7. Question Card ---------- */
+.rv-card { background: var(--background-secondary); border: 1px solid var(--background-modifier-border); border-radius: 0.75em; padding: 1.375em min(1.625em, 5%); margin: 0 0 1.125em; min-width: 0; max-width: 100%; overflow-wrap: anywhere; box-sizing: border-box; }
+.rv-cards { display: block; }
+.rv-stream-slot { display: block; }
+.rv-card-placeholder { opacity: 0.72; }
+.rv-card-placeholder .rv-card-top { margin-bottom: 0.375em; }
+/* Large streamed sessions: let the browser skip layout/paint for cards that are
+   far outside the viewport. The choice-layout controller only measures visible
+   cards, so skipped cards are measured when they enter the viewport. */
+.rv-quiz-body.rv-streaming-cards > .rv-cards > .rv-stream-slot > .rv-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 18rem;
+}
+.rv-body.rv-streaming-cards > .rv-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 18rem;
+}
+.rv-card-top { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 0.25em 0.625em; margin-bottom: 0.875em; text-align: center; }
+.rv-num { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 1.625em; height: 1.625em; padding: 0 0.375em; box-sizing: border-box; border-radius: 999px; background: var(--interactive-accent); color: var(--text-on-accent); font-size: 0.75em; font-weight: 700; line-height: 1; white-space: nowrap; }
+.rv-src { min-width: 0; max-width: 100%; color: var(--text-faint); font-size: 0.75em; }
+.rv-breadcrumb { flex-basis: 100%; text-align: center; color: var(--text-faint); font-size: 0.75em; margin-top: 0.125em; overflow-wrap: anywhere; }
+.rv-q { text-align: center; font-size: 1em; line-height: 1.65; margin: 0 0 1.375em; min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.rv-q > * { margin-left: auto; margin-right: auto; }
+
+.rv-section-label { margin: 0.875em 0 0.375em; font-size: 0.75em; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.rv-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(max(min(100%, 16.25em), calc((100% - 0.625em) / 2)), 1fr)); gap: 0.625em; margin-bottom: 1.125em; min-width: 0; }
+/* Long choice text: one column so each button gets the full card width. */
+.rv-choices.is-stacked { grid-template-columns: minmax(0, 1fr); }
+/* Measurement pass: width 0 + nowrap exposes the natural single-line width. */
+.rv-choices.is-measuring .rv-md { width: 0 !important; min-width: 0 !important; flex: 0 0 auto !important; }
+.rv-choices.is-measuring .rv-md, .rv-choices.is-measuring .rv-md * { white-space: nowrap !important; }
+.rv-choice { display: flex; align-items: flex-start; gap: 0.625em; min-width: 0; min-height: 3.25em; max-width: 100%; height: auto; white-space: normal; padding: 0.75em min(0.875em, 4%); background: var(--background-primary); border: 1.5px solid var(--background-modifier-border); border-radius: 0.625em; color: var(--text-normal); text-align: left; font-size: 1em; line-height: 1.4; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; user-select: text !important; box-sizing: border-box; }
+.rv-choice:hover:not(:disabled) { background: var(--background-modifier-hover); border-color: var(--interactive-accent); }
+.rv-choice.is-picked { border-color: var(--interactive-accent); background: var(--background-modifier-hover); box-shadow: 0 0 0 1.5px var(--interactive-accent) inset; }
+.rv-choice.is-correct { border-color: var(--rv-correct); background: var(--background-modifier-success); }
+.rv-choice.is-wrong { border-color: var(--rv-wrong); background: var(--background-modifier-error); }
+.rv-choice:disabled { cursor: default; }
+.rv-letter { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 1.625em; height: 1.625em; border-radius: 50%; background: var(--background-modifier-border); color: var(--text-muted); font-size: 0.75em; font-weight: 700; transition: background .15s, color .15s; user-select: none !important; }
+.rv-choice.is-picked .rv-letter { background: var(--interactive-accent); color: var(--text-on-accent); }
+.rv-choice.is-correct .rv-letter { background: var(--rv-correct); color: var(--text-on-accent); }
+.rv-choice.is-wrong .rv-letter { background: var(--rv-wrong); color: var(--text-on-accent); }
+.rv-choice > .rv-md { flex: 1 1 0; min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+.rv-choice .rv-md p, .rv-choice .rv-md li, .rv-choice .rv-md a, .rv-choice .rv-md code { overflow-wrap: anywhere; word-break: break-word; }
+.rv-choice .rv-md p { margin: 0; }
+
+.rv-submit-row { display: flex; justify-content: flex-end; width: 100%; margin-top: 0.375em; }
+.rv-submit { display: inline-flex; align-items: center; justify-content: center; margin: 0 !important; min-height: 2.75em; height: auto; padding: 0.625em 1.75em; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 0.5em; font-size: 0.9375em; font-weight: 600; line-height: 1.3; text-align: center; box-sizing: border-box; cursor: pointer; transition: background .15s, opacity .15s; }
+.rv-submit:hover:not(:disabled) { background: var(--interactive-accent-hover); }
+.rv-submit:disabled { opacity: .5; cursor: not-allowed; }
+.rv-feedback { margin: 1em auto 0; padding: 0.75em min(1em, 4%); border-radius: 0.625em; border-left: 4px solid transparent; font-size: 1em; text-align: center; }
+.rv-feedback.is-correct { background: var(--background-modifier-success); border-left-color: var(--rv-correct); }
+.rv-feedback.is-wrong { background: var(--background-modifier-error); border-left-color: var(--rv-wrong); }
+.rv-feedback.rv-pending { background: var(--background-secondary); border-left-color: var(--text-faint); color: var(--text-muted); }
+.rv-provenance { margin-top: 0.375em; font-size: 0.875em; color: var(--text-muted); }
+.rv-provenance-value { font-family: var(--font-monospace, monospace); color: var(--text-normal); }
+
+.rv-editor-proxy { min-height: 2.75em; padding: 0.625em min(0.875em, 4%); border: 1.5px dashed var(--background-modifier-border); border-radius: 0.625em; background: var(--background-primary); cursor: text; transition: border-color .15s; font-size: var(--font-text-size, 1em); }
+.rv-editor-proxy.is-clickable:hover { border-color: var(--interactive-accent); }
+.rv-editor-proxy.is-correct { border-style: solid; border-color: var(--rv-correct); background: var(--background-modifier-success); cursor: default; }
+.rv-editor-proxy.is-wrong { border-style: solid; border-color: var(--rv-wrong); background: var(--background-modifier-error); cursor: default; }
+.rv-editor-proxy > *:first-child { margin-top: 0; }
+.rv-editor-proxy > *:last-child { margin-bottom: 0; }
+.rv-editor-placeholder { color: var(--text-faint); font-style: italic; }
+.rv-editor { display: grid; grid-template-columns: 1fr; gap: 0.5em; }
+@media (min-width: 640px) { .rv-editor { grid-template-columns: 1fr 1fr; } }
+.rv-editor-input { width: 100%; min-height: 6em; padding: 0.625em min(0.875em, 4%); border: 1.5px solid var(--interactive-accent); border-radius: 0.625em; background: var(--background-primary); color: var(--text-normal); font-family: var(--font-text, inherit); font-size: var(--font-text-size, 1em); line-height: 1.5; resize: vertical; outline: none; box-sizing: border-box; }
+.rv-editor-preview { min-height: 6em; padding: 0.625em min(0.875em, 4%); border: 1px solid var(--background-modifier-border); border-radius: 0.625em; background: var(--background-secondary); overflow-wrap: anywhere; font-size: var(--font-text-size, 1em); }
+.rv-editor-preview > *:first-child { margin-top: 0; }
+.rv-editor-preview > *:last-child { margin-bottom: 0; }
+.rv-editor-proxy.is-readonly { cursor: default; }
+.rv-editor-proxy.is-readonly.is-correct, .rv-editor-proxy.is-readonly.is-wrong { border-style: dashed; }
+
+.rv-explanation { margin: 1em auto 0; padding: 0.875em min(1.125em, 4%); border-radius: 0.625em; background: var(--background-primary); border: 1px solid var(--background-modifier-border); font-size: 1em; line-height: 1.65; color: var(--text-normal); }
+.rv-explanation > *:first-child { margin-top: 0; }
+.rv-explanation > *:last-child { margin-bottom: 0; }
+/* Completion is a compact sticky footer so the finished session stays visible
+   without scrolling away from the last answer. */
+.rv-done {
+    position: sticky; bottom: 0; z-index: 9;
+    background: var(--background-secondary); border: 1px solid var(--background-modifier-border);
+    border-radius: 0.75em; padding: 0.75em min(1em, 4%); margin-top: 1em; text-align: center;
+    box-shadow: 0 -6px 16px -10px rgba(0, 0, 0, 0.45);
+}
+.rv-done h3 { font-size: 1.05em; font-weight: 700; margin: 0 0 0.25em; }
+.rv-done p.rv-muted { color: var(--text-muted); font-size: 0.8125em; margin: 0 0 0.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rv-done .rv-pass-summary { display: inline-flex; justify-content: center; gap: 0.375em; padding: 0; margin: 0.25em 0 0.5em; font-size: 0.875em; border: 0; background: transparent; }
+.rv-done .rv-actions { gap: 0.5em; margin: 0.5em 0 0; }
+.rv-done .rv-actions button { min-height: 2.25em; padding: 0.375em 0.875em; font-size: 0.8125em; }
+.rv-card-missing { border-style: dashed; border-color: var(--text-faint); background: var(--background-secondary); text-align: center; }
+.rv-missing-path { font-family: var(--font-monospace, monospace); font-size: 0.75em; color: var(--text-faint); overflow-wrap: anywhere; }
+.rv-pass-summary { display: flex; flex-wrap: wrap; gap: 0.5em; align-items: baseline; padding: 0.625em 0.875em; border-radius: 0.5em; border-left: 3px solid var(--background-modifier-border); background: var(--background-secondary); margin: 0.5em 0 0.875em; }
+.rv-pass-summary.is-pass { border-left-color: var(--rv-correct); }
+.rv-pass-summary.is-fail { border-left-color: var(--rv-wrong); }
+.rv-pass-verdict { font-weight: 700; }
+.rv-pass-summary.is-pass .rv-pass-verdict { color: var(--rv-correct); }
+.rv-pass-summary.is-fail .rv-pass-verdict { color: var(--rv-wrong); }
+.rv-pass-detail { color: var(--text-muted); font-size: 0.875em; }
+
+.rv-flag-button, .rv-flag-badge { display: inline-flex; align-items: center; justify-content: center; gap: 0.25em; min-height: 1.5em; height: auto; padding: 0.125em 0.5em; border: 1px solid var(--background-modifier-border); border-radius: 999px; background: var(--background-primary); color: var(--text-muted); font-size: 0.625em; font-weight: 700; line-height: 1.2; text-transform: uppercase; letter-spacing: 0.04em; }
+.rv-flag-button { cursor: pointer; }
+.rv-flag-button:hover { border-color: var(--text-warning, #d19a00); color: var(--text-warning, #d19a00); }
+.rv-flag-button.is-flagged, .rv-flag-badge.is-flagged { border-color: var(--text-warning, #d19a00); background: color-mix(in srgb, var(--text-warning, #d19a00) 16%, transparent); color: var(--text-warning, #d19a00); }
+
+/* ---------- 8. Modals & Shared UI (History, Manage, Import) ---------- */
+.rv-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .5); display: grid; place-items: center; z-index: var(--layer-modal, 100); padding: min(1em, 4%); grid-template-columns: minmax(0, 1fr); animation: rv-fade-in .12s ease-out; }
+.rv-modal { background: var(--modal-background, var(--background-primary)); border: 1px solid var(--background-modifier-border); border-radius: 0.75em; padding: 1.375em min(1.5em, 5%); max-width: 26.25em; width: 100%; box-shadow: var(--shadow-l, 0 6px 24px rgba(0,0,0,.2)); animation: rv-scale-in .15s ease-out; }
+.rv-modal h3 { font-size: 1.2em; font-weight: 700; margin: 0 0 0.5em; text-align: left; }
+.rv-modal p.rv-muted { color: var(--text-muted); font-size: 0.875em; line-height: 1.55; margin: 0 0 1.125em; text-align: left; }
+.rv-modal-actions { display: flex; justify-content: flex-end; gap: 0.5em; flex-wrap: wrap; }
+
+/* ConfirmModal detail lines (category sync, bulk moves). */
+.rv-sync-list { margin: 0.5em 0 0.75em; padding: 0.5em 0.75em; max-height: 12em; overflow-y: auto; list-style: none; border: 1px solid var(--background-modifier-border); border-radius: 0.375em; background: var(--background-secondary); font-family: var(--font-monospace, monospace); font-size: 0.75em; }
+.rv-sync-list li { padding: 0.125em 0; word-break: break-all; }
+.rv-sync-list li + li { border-top: 1px solid var(--background-modifier-border); }
+.rv-sync-more { color: var(--text-muted); font-style: italic; }
+
+/* Open-review-tab picker: one existing tab per row. */
+.rv-open-tab-list { margin: 0.5em 0 0.75em; border: 1px solid var(--background-modifier-border); border-radius: 0.375em; background: var(--background-secondary); overflow: hidden; }
+.rv-open-tab-row { display: flex; align-items: center; gap: 0.75em; padding: 0.5em 0.75em; }
+.rv-open-tab-row + .rv-open-tab-row { border-top: 1px solid var(--background-modifier-border); }
+.rv-open-tab-label { flex: 1 1 auto; min-width: 0; word-break: break-word; font-size: 0.875em; }
+.rv-open-tab-row button { flex: 0 0 auto; }
+
+.rv-status-pending { background: color-mix(in srgb, var(--interactive-accent) 16%, transparent); color: var(--text-accent); }
+.rv-status-completed { background: color-mix(in srgb, var(--text-success, var(--color-green)) 16%, transparent); color: var(--text-success, var(--color-green)); }
+.rv-status-abandoned { background: color-mix(in srgb, var(--text-error, var(--color-red)) 16%, transparent); color: var(--text-error, var(--color-red)); }
+.rv-status-archived { background: var(--background-modifier-border); color: var(--text-muted); }
+
+/* Viewport-relative sizing is for desktop/tablet only. On a phone the IME
+   shrinks the window, so a dialog that also sizes itself from `dvh` ends up
+   shorter than its own host and its footer floats above a dead gap. Phones use
+   the flex rules further down instead. */
+.rv-history-modal { width: min(62.5em, 100%); max-width: min(62.5em, 100%); }
+body:not(.is-phone) .rv-history-modal { height: min(90dvh, 53.75em); max-height: min(90dvh, 53.75em); }
+/* The shell fills the modal; the modal owns the height. A second, viewport-
+   relative height here double-counts the space the host already provides (and
+   on a phone it fights the IME-shrunk window). */
+.rv-history-shell { display: flex; flex-direction: column; flex: 1 1 auto; height: auto; min-height: 0; overflow: hidden; }
+.rv-history-header { flex: 0 0 auto; padding-bottom: 0.75em; border-bottom: var(--rv-bw) solid var(--background-modifier-border); }
+.rv-history-header h2 { margin: 0 0 0.25em; padding-right: 2.25em; font-size: 1.25em; }
+.rv-history-header p { margin: 0; color: var(--text-muted); font-size: 0.75em; line-height: 1.45; }
+.rv-history-body { display: flex; flex-direction: column; flex: 1 1 auto; gap: 0.5em; min-height: 0; overflow: hidden; padding-top: 0.75em; }
+.rv-history-filters { display: flex; flex: 0 0 auto; flex-direction: column; gap: 0.4375em; margin-bottom: 0; padding-bottom: 0.625em; border-bottom: var(--rv-bw) solid var(--background-modifier-border); }
+.rv-history-filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.375em 0.625em; font-size: 0.75em; }
+.rv-history-filter-row > label { flex: none; min-width: 3.25em; color: var(--text-muted); font-size: 0.6875em; }
+.rv-history-search { flex: 1 1 17.5em; min-width: 11.25em; min-height: 2.25em; padding: 0.375em 0.625em; border: var(--rv-bw) solid var(--background-modifier-border); border-radius: var(--rv-r-m); background: var(--background-primary); color: var(--text-normal); font-family: inherit; font-size: var(--font-text-size, 1em); }
+.rv-history-chip-row { display: flex; flex-wrap: wrap; gap: 0.25em; }
+.rv-history-chip { min-height: 1.75em; height: auto; padding: 0.1875em 0.5625em; border: var(--rv-bw) solid var(--background-modifier-border); border-radius: var(--rv-r-pill); background: var(--background-secondary); color: var(--text-muted); font-size: 0.6875em; line-height: 1.2; cursor: pointer; }
+.rv-history-chip:hover:not(.is-active) { background: var(--background-modifier-hover); color: var(--text-normal); }
+.rv-history-chip.is-active { border-color: var(--interactive-accent); background: var(--interactive-accent); color: var(--text-on-accent); }
+.rv-history-date { min-height: 2.25em; height: auto; padding: 0.3125em 0.5em; border: var(--rv-bw) solid var(--background-modifier-border); border-radius: var(--rv-r-m); background: var(--background-primary); color: var(--text-normal); font-family: inherit; font-size: var(--font-text-size, 1em); }
+.rv-history-category { min-height: 2.25em; min-width: 9.375em; font-size: var(--font-text-size, 1em); }
+.rv-history-summary-row { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 0.625em; min-height: 1.75em; }
+.rv-history-clear { height: auto; padding: 0; border: 0; background: transparent; color: var(--text-accent); font-size: 0.6875em; cursor: pointer; }
+.rv-history-clear:hover:not(:disabled) { text-decoration: underline; }
+.rv-history-clear:disabled { color: var(--text-faint); cursor: default; }
+.rv-history-workspace { display: grid; grid-template-columns: minmax(0, 0.4fr) minmax(0, 0.6fr); grid-template-rows: minmax(0, 1fr); flex: 1 1 auto; gap: 1em; min-height: 0; }
+.rv-history-list { display: flex; flex-direction: column; gap: 0.25em; min-height: 0; overflow-y: auto; padding: 0 0.25em 0 0; }
+.rv-history-row { display: flex; flex-wrap: nowrap; flex: 0 0 auto; justify-content: flex-start; align-items: center; gap: 0.75em; height: auto; min-height: 2.5em; padding: 0.5em 0.75em; border: var(--rv-bw) solid var(--background-modifier-border); border-radius: var(--rv-r-m); background: var(--background-secondary); font-size: 0.6875em; line-height: 1.35; cursor: pointer; width: 100%; font: inherit; text-align: left; color: var(--text-normal); }
+.rv-history-row:hover { border-color: var(--interactive-accent); }
+.rv-history-row.is-selected { border-color: var(--interactive-accent); background: var(--background-modifier-hover); }
+.rv-history-row:focus-visible { outline: var(--rv-bw-ring) solid var(--interactive-accent); outline-offset: 0.125em; }
+.rv-history-row .rv-history-date { flex: 0 0 auto; min-width: 4.5em; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text-muted); font-size: 0.6875em; white-space: nowrap; }
+.rv-history-label { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 0.125em; justify-content: center; }
+.rv-history-label > span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.75em; font-weight: 500; }
+.rv-history-progress, .rv-history-flags, .rv-history-row .rv-session-status { flex: 0 0 auto; }
+.rv-history-progress, .rv-history-flags { color: var(--text-muted); font-size: 0.6875em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rv-history-flags.has-flags { color: var(--text-warning, #d19a00); font-weight: var(--font-semibold, 600); }
+.rv-history-row .rv-session-status { padding: 0.125em 0.5em; border-radius: var(--rv-r-pill, 999px); font-size: 0.5625em; font-weight: var(--font-semibold, 600); letter-spacing: 0.02em; text-transform: none; }
+.rv-history-detail { display: flex; flex-direction: column; min-height: 0; min-width: 0; overflow: hidden; padding: 0 0.25em 0 0.875em; border-left: var(--rv-bw) solid var(--background-modifier-border); }
+.rv-history-detail > .rv-session-detail { flex: 1 1 auto; min-height: 0; }
+.rv-history-detail-title { flex: 0 0 auto; margin: 0 0 0.625em; font-size: 1em; line-height: 1.3; }
+.rv-history-empty { padding: 1.5em 0.625em; text-align: center; color: var(--text-muted); font-size: 0.75em; }
+.rv-history-footer { flex: 0 0 auto; margin: 0; padding-top: 0.625em; border-top: var(--rv-bw) solid var(--background-modifier-border); justify-content: flex-end; }
+
+.rv-detail-meta { display: flex; flex-wrap: wrap; gap: 0.5em; align-items: center; margin-bottom: 0.75em; font-size: 0.875em; color: var(--text-muted); min-width: 0; }
+.rv-detail-meta > span { min-width: 0; overflow-wrap: anywhere; }
+.rv-detail-status { padding: 0.125em 0.5em; border-radius: 0.25em; font-size: 0.6875em; font-weight: 700; letter-spacing: 0.04em; }
+.rv-detail-grid { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.25em 0.875em; margin-bottom: 0.75em; font-size: 0.875em; min-width: 0; }
+.rv-detail-key { color: var(--text-muted); }
+.rv-detail-val { color: var(--text-normal); min-width: 0; overflow-wrap: anywhere; word-break: break-word; }
+.rv-detail-pool { margin-bottom: 0.875em; }
+.rv-detail-pool summary { cursor: pointer; font-weight: 600; margin-bottom: 0.375em; }
+.rv-detail-pool ul { margin: 0; padding-left: 0; list-style: none; font-family: var(--font-monospace, monospace); font-size: 0.75em; max-height: 15em; overflow-y: auto; }
+.rv-detail-q { display: flex; gap: 0.5em; padding: 0.125em 0; overflow: hidden; }
+.rv-detail-qn { flex: none; width: 1.75em; color: var(--text-faint); }
+.rv-detail-qp { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-detail-qs { flex: none; font-size: 0.6875em; text-transform: uppercase; }
+.rv-q-correct .rv-detail-qs { color: var(--text-success); }
+.rv-q-wrong .rv-detail-qs { color: var(--text-error); }
+.rv-q-submitted .rv-detail-qs { color: var(--text-muted); }
+.rv-q-in-progress .rv-detail-qs { color: var(--text-warning); }
+.rv-q-unanswered .rv-detail-qs { color: var(--text-faint); }
+.rv-q-missing .rv-detail-qs { color: var(--text-warning); }
+.rv-q-missing .rv-detail-qp { color: var(--text-warning); font-style: italic; }
+.rv-detail-warning { padding: 0.625em 0.875em; border-left: 3px solid var(--interactive-accent); background: var(--background-secondary); border-radius: 0.25em; font-size: 0.875em; color: var(--text-muted); margin-bottom: 0.875em; min-width: 0; overflow-wrap: anywhere; }
+.rv-detail-flags { margin-bottom: 0.875em; }
+.rv-detail-flags summary { cursor: pointer; font-weight: 600; margin-bottom: 0.375em; }
+.rv-detail-flags ul { margin: 0; padding-left: 0; list-style: none; font-family: var(--font-monospace, monospace); font-size: 0.75em; max-height: 12em; overflow-y: auto; }
+.rv-detail-flags li { display: flex; gap: 0.5em; padding: 0.125em 0; overflow: hidden; }
+.rv-detail-flag, .rv-detail-qtime, .rv-detail-qtimer { flex: none; font-size: 0.625em; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+.rv-detail-flag { color: var(--text-warning); }
+.rv-detail-qtime { color: var(--text-muted); font-weight: 400; }
+.rv-detail-qtimer { color: var(--text-error); }
+.rv-detail-actions { justify-content: flex-end; flex-wrap: wrap; gap: 0.5em; margin-top: 0.75em; }
+
+.rv-modal-with-cancel .modal-close-button { display: none; }
+/* Manage questions: taller host, slightly looser button/section rhythm.
+   Widths are container-relative (never 100vw) so the modal always stays inside
+   .modal-container on phones, where Obsidian renders modals as bottom sheets. */
+.modal:has(.rv-manage-modal) { width: 100%; max-width: min(46em, 100%); box-sizing: border-box; }
+body:not(.is-phone) .modal:has(.rv-manage-modal) { height: min(86dvh, 44em); max-height: min(86dvh, 44em); }
+/* Flex containment: no descendant can force the modal wider than the viewport. */
+.rv-manage-modal, .rv-manage-modal * { box-sizing: border-box; min-width: 0; }
+.rv-manage-modal { display: flex; flex-direction: column; width: 100%; max-width: 100%; height: 100%; min-height: 0; overflow-x: clip; --rv-manage-row-height: 1.875em; --rv-manage-control-height: 1.75em; }
+.rv-manage-modal h2 { flex: 0 0 auto; margin: 0 0 0.75em; }
+.rv-manage-modal > .setting-item-description { flex: 0 0 auto; margin: 0 0 0.75em; }
+.rv-manage-modal .modal-button-container { flex: 0 0 auto; position: sticky; bottom: 0; z-index: 2; background: var(--modal-background, var(--background-primary)); padding-top: 0.75em; margin-top: 0.75em; gap: 0.5em; }
+.rv-manage-modal .modal-button-container button { min-height: var(--rv-manage-control-height); padding: 0.25em 0.9em; }
+.rv-manage-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em; margin-bottom: 0.75em; }
+.rv-manage-tool { 
+    display: inline-flex; align-items: center; justify-content: center; height: auto;
+    min-height: var(--rv-manage-control-height, 1.75em); padding: 0.25em 0.625em; 
+    border: 1px solid var(--background-modifier-border); border-radius: 0.375em; 
+    background: var(--background-secondary); color: var(--text-normal); 
+    font-size: 0.875em; line-height: 1.2; box-sizing: border-box; cursor: pointer; 
+}
+.rv-manage-tool:hover:not(:disabled) { border-color: var(--interactive-accent); }
+.rv-manage-tool:disabled { opacity: 0.45; cursor: default; }
+.rv-manage-selected { color: var(--text-muted); font-size: 0.875em; }
+.rv-manage-summary { flex: none; margin: 0 0 0.5em; color: var(--text-muted); font-size: 0.75em; }
+.rv-manage-summary.is-empty { color: var(--text-warning, #d19a00); }
+.rv-manage-preset-bar { flex: 0 0 auto; margin: 0 0 0.625em; }
+.rv-manage-tree { flex: 1 1 auto; width: 100%; max-width: 100%; min-height: 6em; max-height: 28.75em; overflow-y: auto; overflow-x: hidden; border: 1px solid var(--background-modifier-border); border-radius: 0.5em; background: var(--background-secondary); padding: 0.5em; }
+body:not(.is-phone) .rv-manage-tree { max-height: min(55dvh, 28.75em); }
+.rv-tree-node { min-width: 0; }
+.rv-tree-children { margin-left: 0.75em; padding-left: 0.625em; border-left: 1px solid var(--background-modifier-border); }
+.rv-manage-cat-row, .rv-manage-q-row { position: relative; display: flex; align-items: center; gap: 0.375em; min-height: var(--rv-manage-row-height, 1.875em); padding: 0.25em 0.375em; border-radius: 0.25em; }
+.rv-tree-children > .rv-manage-q-row::before, .rv-tree-children > .rv-tree-node > .rv-manage-cat-row::before { content: ''; position: absolute; left: -0.6875em; top: 50%; width: 0.625em; border-top: 1px solid var(--background-modifier-border); }
+.rv-manage-cat-row { cursor: pointer; }
+.rv-manage-q-row:hover { background: var(--background-modifier-hover); }
+.rv-manage-q-row.is-draggable { touch-action: pan-y; }
+.rv-manage-q-row.is-drag-source { opacity: 0.35; }
+.rv-manage-q-grip { flex: none; display: flex; align-items: center; justify-content: center; width: 1.25em; height: 1.25em; margin-inline-start: 0.125em; color: var(--text-faint); opacity: 0; cursor: grab; touch-action: none; transition: opacity 0.12s ease-out, color 0.12s ease-out; --icon-size: var(--icon-xs); --icon-stroke: var(--icon-xs-stroke-width); }
+@media (hover: none) { .rv-manage-q-grip { opacity: 0.6; } }
+.rv-manage-q-row:hover .rv-manage-q-grip, .rv-manage-q-row.is-drag-source .rv-manage-q-grip { opacity: 1; }
+.rv-manage-q-grip:hover { color: var(--text-muted); background: var(--background-modifier-hover); border-radius: var(--radius-s, 0.25em); }
+body.rv-manage-dragging { user-select: none; -webkit-user-select: none; cursor: grabbing; }
+.rv-manage-q-ghost { position: fixed; top: 0; left: 0; z-index: var(--layer-dragged-item, 1000); margin: 0; padding: 0.25em 0.375em; display: flex; align-items: center; gap: 0.375em; border: 1px solid var(--interactive-accent); border-radius: 0.375em; background: var(--drag-item-background, var(--background-primary)); box-shadow: var(--drag-item-shadow, 0 2px 8px var(--background-modifier-box-shadow)); pointer-events: none; opacity: 0.96; }
+.rv-manage-q-ghost.is-settling { pointer-events: none; }
+.rv-manage-cat-row.is-drop-target { background: color-mix(in srgb, var(--interactive-accent) 18%, transparent); box-shadow: inset 0 0 0 1px var(--interactive-accent); }
+.rv-manage-cat-row.is-drop-target .rv-manage-cat-label { color: var(--text-normal); }
+.rv-manage-cat-row.is-drop-target::after { content: 'Drop here'; margin-inline-start: auto; padding: 0.0625em 0.375em; border-radius: 999px; background: var(--interactive-accent); color: var(--text-on-accent); font-size: 0.625em; font-weight: 600; white-space: nowrap; }
+@keyframes rv-manage-moved { 0% { background: color-mix(in srgb, var(--interactive-accent) 30%, transparent); } 100% { background: transparent; } }
+.rv-manage-q-row.is-just-moved { animation: rv-manage-moved 900ms ease-out; }
+.rv-manage-check { appearance: none; -webkit-appearance: none; flex: none; width: 1.125em; height: 1.125em; padding: 0; border: 1.5px solid var(--background-modifier-border); border-radius: 0.25em; background: var(--background-primary); color: var(--text-on-accent); font-size: 0.75em; line-height: 1; cursor: pointer; }
+.rv-manage-check.is-checked { border-color: var(--interactive-accent); background: var(--interactive-accent); }
+.rv-manage-check.is-indeterminate { border-color: var(--interactive-accent); color: var(--interactive-accent); }
+.rv-manage-check:disabled { opacity: 0.45; cursor: default; }
+.rv-manage-arrow { flex: none; width: 1.125em; height: 1.125em; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.75em; line-height: 1; transition: transform 0.15s ease-out; }
+.rv-manage-arrow.is-expanded { transform: rotate(90deg); }
+.rv-manage-cat-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.rv-manage-count { flex: none; color: var(--text-muted); font-size: 0.6875em; }
+.rv-manage-q-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-sync-entry-detail { flex: 0 1 auto; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25em; justify-content: flex-end; margin-left: auto; font-family: var(--font-monospace, monospace); font-size: 0.6875em; color: var(--text-muted); text-align: right; }
+.rv-sync-entry-from { text-decoration: line-through; opacity: 0.85; word-break: break-all; }
+.rv-sync-entry-to { color: var(--text-normal); word-break: break-all; }
+.rv-sync-entry-arrow { color: var(--text-faint); }
+.rv-manage-cat-row.is-highlighted { background: var(--background-modifier-hover); box-shadow: inset 2px 0 0 var(--interactive-accent); }
+.rv-manage-root { font-weight: 600; }
+.rv-need-sync-badge { flex: none; padding: 0.0625em 0.375em; border-radius: 999px; background: color-mix(in srgb, var(--text-warning, #d19a00) 15%, transparent); color: var(--text-warning, #d19a00); font-size: 0.625em; white-space: nowrap; }
+.rv-need-sync { color: var(--text-warning, #d19a00); font-size: 0.875em; margin-top: -0.25em; }
+
+.rv-manage-preset-row, .rv-session-preset-row { display: flex; flex-wrap: wrap; gap: 0.375em; align-items: center; min-width: 0; max-width: 100%; }
+.rv-manage-preset-row > *, .rv-session-preset-row > * { flex: 0 0 auto; }
+.rv-manage-preset-row .rv-modes { display: flex; flex-wrap: wrap; gap: 0.375em; justify-content: flex-start; margin: 0; width: 100%; }
+.rv-manage-preset-row .rv-mode { min-height: 1.75em; height: auto; padding: 0.25em 0.625em; font-size: 0.8125em; white-space: normal; max-width: 100%; text-align: left; overflow-wrap: anywhere; line-height: 1.2; box-sizing: border-box; }
+.rv-manage-preset-row .rv-chip-row-toggle { min-height: 1.75em; height: auto; padding: 0.25em 0.625em; font-size: 0.8125em; border-radius: 0.5em; flex: 0 0 auto; line-height: 1.2; box-sizing: border-box; }
+.rv-manage-preset-actions, .rv-session-preset-row-actions { margin-top: 0.375em; padding-top: 0.375em; padding-bottom: 0; border-top: 1px solid var(--background-modifier-border); align-items: center; }
+.rv-manage-save, .rv-manage-update, .rv-session-preset-save, .rv-session-preset-update { font-weight: 600; }
+.rv-manage-update, .rv-session-preset-update { color: var(--text-accent); }
+.rv-manage-update:disabled, .rv-session-preset-update:disabled { color: var(--text-faint); opacity: 0.5; }
+
+.rv-import-host { display: flex; flex-direction: column; flex: 1 1 auto; width: 100%; min-height: 0; gap: 0.625em; overflow: hidden; }
+.rv-import-json-section { display: flex; flex-direction: column; flex: 0 0 auto; gap: 0.375em; min-height: 0; }
+.rv-import-json { width: 100%; min-height: 9.375em; box-sizing: border-box; resize: none; padding: 0.5em 0.625em; border: 1.5px solid var(--background-modifier-border); border-radius: 0.5em; background: var(--background-primary); color: var(--text-normal); font-family: var(--font-monospace, monospace); font-size: 1em !important; }
+.rv-import-file-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em; margin: 0; flex: 0 0 auto; width: 100%; }
+.rv-import-mode-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5em; margin: 0; margin-inline-start: auto; }
+.rv-import-mode-row label { font-size: 0.875em; color: var(--text-muted); }
+.rv-import-mode-row select { flex: 1 1 16.25em; min-height: 2.125em; font-size: 1em !important; }
+.rv-import-preview { display: flex; flex-direction: column; flex: 1 1 auto; gap: 0.4375em; min-height: 9.375em; margin: 0; padding: 0 0 0.5em; overflow: hidden; width: 100%; }
+.rv-import-counts { position: sticky; top: 0; z-index: 2; display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; gap: 0.3125em; padding: 0.125em 0 0.3125em; border-bottom: 1px solid var(--background-modifier-border); background: var(--modal-background, var(--background-primary)); }
+.rv-import-count-pill { display: inline-flex; align-items: baseline; gap: 0.25em; min-height: 1.375em; padding: 0.125em 0.4375em; border: 1px solid var(--background-modifier-border); border-radius: 999px; background: var(--background-secondary); font-size: 0.6875em; line-height: 1.2; white-space: nowrap; }
+.rv-import-count-pill.rv-import-count-total { font-weight: 600; background: var(--background-modifier-hover); }
+.rv-import-count-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+.rv-import-count-label { color: var(--text-muted); font-size: 0.625em; }
+.rv-import-details { display: flex; flex-direction: column; flex: 0 0 auto; min-height: 0; border: 1px solid var(--background-modifier-border); border-radius: 0.4375em; background: var(--background-secondary); overflow: hidden; }
+.rv-import-details[open] { flex: 1 1 auto; }
+.rv-import-details-summary { flex: 0 0 auto; display: flex; align-items: center; gap: 0.375em; min-height: 1.875em; padding: 0.25em 0.5625em; list-style: none; cursor: pointer; font-size: 0.875em; font-weight: 600; user-select: none; }
+.rv-import-details-summary::-webkit-details-marker { display: none; }
+.rv-import-details-summary::before { content: '▸'; flex: none; width: 0.625em; color: var(--text-faint); font-size: 0.625em; line-height: 1; }
+.rv-import-details[open] > .rv-import-details-summary::before { content: '▾'; }
+.rv-import-details-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; max-height: none; padding: 0.3125em 0.5625em 0.5em; border-top: 1px solid var(--background-modifier-border); overflow-y: auto; overscroll-behavior: contain; }
+.rv-import-files-scroll { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: 0.25em; padding-right: 0.25em; overflow-y: auto; }
+
+/* Widen the Obsidian modal host, not the content element, so the content can
+   never exceed the modal and force a horizontal scrollbar. */
+.modal:has(.rv-session-detail-modal) { width: min(52em, 100%); max-width: min(52em, 100%); }
+.rv-session-detail-modal { box-sizing: border-box; width: 100%; max-width: 100%; max-height: 56em; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+body:not(.is-phone) .rv-session-detail-modal { max-height: min(90dvh, 56em); }
+.rv-session-detail-modal h2 { flex: 0 0 auto; margin-top: 0; }
+
+/* Shared session-detail shell: scrollable body + fixed action footer. */
+.rv-session-detail { display: flex; flex-direction: column; min-width: 0; min-height: 0; container-type: inline-size; }
+.rv-session-detail-body { flex: 1 1 auto; min-width: 0; min-height: 0; overflow-x: hidden; overflow-y: auto; padding-right: 0.25em; }
+.rv-session-detail-actions { position: sticky; bottom: 0; z-index: 1; display: flex; flex: 0 0 auto; flex-wrap: wrap; min-width: 0; margin: 0; padding: 0.75em 0; background: var(--modal-background, var(--background-primary)); }
+.rv-session-detail-modal > .rv-session-detail { flex: 1 1 auto; min-height: 0; }
+
+/* Stack key/value rows when the shared panel itself is narrow (history split). */
+@container (max-width: 26em) {
+    .rv-detail-grid { grid-template-columns: minmax(0, 1fr); gap: 0; }
+    .rv-detail-key { margin-top: 0.375em; }
+    .rv-detail-key:first-child { margin-top: 0; }
+    .rv-detail-val { margin-bottom: 0.375em; }
+}
+
+.rv-preset-manager-modal { width: min(47.5em, 100%); max-width: min(47.5em, 100%); }
+body:not(.is-phone) .rv-preset-manager-modal { height: min(90dvh, 53.75em); max-height: min(90dvh, 53.75em); }
+.rv-preset-manager-modal .modal-content { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+.rv-preset-manager-modal h2 { flex: 0 0 auto; margin: 0 0 0.75em; padding-right: 2.25em; font-size: 1.25em; }
+.rv-preset-modal-host { display: flex; flex-direction: column; align-items: stretch; flex: 1 1 auto; width: 100%; min-height: 0; overflow: hidden; padding: 0 0.125em 0.25em; }
+.rv-settings-back { flex: 0 0 auto; align-self: flex-start; margin-bottom: 0.75em; padding: 0.25em 0.625em; border: 1px solid var(--background-modifier-border); border-radius: var(--rv-r-m); background: var(--background-secondary); color: var(--text-normal); font-size: 0.75em; cursor: pointer; }
+.rv-settings-back:hover { border-color: var(--interactive-accent); }
+
+.rv-preset-list { display: flex; flex-direction: column; gap: 0.25em; margin-top: 0.75em; }
+.rv-preset-row { display: flex; flex: 0 0 auto; align-items: center; gap: 0.625em; padding: 0.5em 0.625em; border: 1px solid var(--background-modifier-border); border-radius: 0.375em; background: var(--background-primary); transition: border-color 0.1s, background 0.1s, opacity 0.1s; }
+.rv-preset-row:hover { border-color: var(--interactive-accent); }
+.rv-preset-row.rv-reorder-hidden { visibility: hidden; position: relative; }
+.rv-preset-row.rv-reorder-hidden::before { content: ""; position: absolute; inset: 0; visibility: visible; border-radius: var(--radius-s, 0.375em); background-color: color-mix(in oklch, var(--interactive-accent) 30%, transparent); }
+.rv-preset-row.rv-reorder-held { border-color: var(--interactive-accent); }
+.rv-preset-check { flex: none; margin: 0; cursor: pointer; }
+.rv-preset-drag { flex: none; display: flex; align-items: center; justify-content: center; width: 1.5em; height: 1.75em; margin-inline-start: -0.25em; padding: 0; border-radius: var(--radius-s, 0.25em); color: var(--text-faint); cursor: grab; user-select: none; touch-action: none; --icon-size: var(--icon-s); --icon-stroke: var(--icon-s-stroke-width); }
+.rv-preset-drag:active { cursor: grabbing; }
+.rv-preset-drag:hover { color: var(--text-muted); background-color: var(--background-modifier-hover); }
+
+.rv-reorder-ghost { position: fixed; top: 0; left: 0; border-radius: var(--radius-s, 0.375em); z-index: var(--layer-dragged-item, 1000); pointer-events: none; cursor: grabbing; }
+.rv-reorder-ghost > .rv-reorder-dragged-item { width: 100%; background-color: var(--drag-item-background, var(--background-primary)); border-color: var(--interactive-accent); box-shadow: var(--drag-item-shadow, 0 2px 8px var(--background-modifier-box-shadow)); }
+.rv-reorder-ghost.is-settling > .rv-reorder-dragged-item { background-color: transparent; border-color: transparent; box-shadow: none; transition: background-color var(--anim-duration-fast, 100ms) ease-out, border-color var(--anim-duration-fast, 100ms) ease-out, box-shadow var(--anim-duration-fast, 100ms) ease-out; }
+body.rv-reorder-grabbing { user-select: none; -webkit-user-select: none; cursor: grabbing; }
+.rv-preset-main { flex: 1 1 auto; display: flex; flex-direction: column; gap: 0.0625em; min-width: 0; }
+.rv-preset-name { font-weight: 600; color: var(--text-normal); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-preset-detail { font-size: 0.6875em; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-preset-actions { flex: none; display: flex; gap: 0.25em; }
+
+/* ============================================================
+   Unified Preset Action Buttons (Handles all 4 Modal Views)
+   ============================================================ */
+.rv-preset-tool,
+.rv-preset-action,
+.rv-preset-bulk button {
+    display: inline-flex; align-items: center; justify-content: center; height: auto;
+    min-height: 1.75em; padding: 0.25em 0.75em;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 0.375em;
+    background: var(--background-secondary);
+    color: var(--text-muted);
+    font-size: 0.6875em;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background .15s, border-color .15s, color .15s;
+}
+.rv-preset-tool:hover:not(:disabled),
+.rv-preset-action:hover:not(:disabled),
+.rv-preset-bulk button:hover:not(:disabled) {
+    border-color: var(--interactive-accent);
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+.rv-preset-tool:disabled,
+.rv-preset-action:disabled,
+.rv-preset-bulk button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+.rv-preset-action-danger:hover:not(:disabled) {
+    border-color: var(--text-error);
+    color: var(--text-error);
+    background: var(--background-modifier-error);
+}
+.rv-preset-bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em; margin: 0.625em 0; padding: 0.5em 0.75em; border: 1px solid var(--interactive-accent); border-radius: 0.375em; background: var(--background-secondary); }
+.rv-preset-bulk-count { font-weight: 600; color: var(--text-normal); margin-right: 0.375em; }
+
+/* ============================================================
+   Preset export pane
+   ============================================================ */
+.rv-preset-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.375em; flex: 0 0 auto; }
+.rv-preset-toolbar-top { margin-bottom: 0.25em; }
+.rv-preset-body { display: flex; flex-direction: column; flex: 1 1 auto; width: 100%; min-height: 0; gap: 0.5em; }
+.rv-preset-empty { flex: 0 0 auto; margin: 0; color: var(--text-muted); font-size: 0.8125em; }
+.rv-export-list { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: 0.25em; overflow-y: auto; padding-right: 0.25em; }
+.rv-export-row { display: flex; flex: 0 0 auto; align-items: center; gap: 0.5em; padding: 0.375em 0.5em; border: 1px solid var(--background-modifier-border); border-radius: 0.375em; background: var(--background-primary); font-size: 0.8125em; cursor: pointer; }
+.rv-export-row:hover { border-color: var(--interactive-accent); }
+.rv-export-row input[type="checkbox"] { flex: none; margin: 0; cursor: pointer; }
+.rv-export-option { cursor: pointer; }
+.rv-export-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-normal); }
+.rv-export-count { flex: none; color: var(--text-muted); font-size: 0.75em; font-variant-numeric: tabular-nums; }
+.rv-export-summary, .rv-preset-summary { flex: 0 0 auto; color: var(--text-muted); font-size: 0.75em; }
+.rv-export-warnings { flex: 0 0 auto; }
+.rv-preset-footer { display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; gap: 0.5em; padding-top: 0.5em; border-top: 1px solid var(--background-modifier-border); }
+
+/* ============================================================
+   Preset import pane
+   ============================================================ */
+.rv-import-section-title { flex: 0 0 auto; margin: 0.25em 0 0.125em; color: var(--text-muted); font-size: 0.75em; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.rv-import-preview-title { margin-top: 0.375em; }
+.rv-import-empty { flex: 0 0 auto; margin: 0; color: var(--text-muted); font-size: 0.8125em; }
+.rv-import-phase-note { flex: 0 0 auto; margin: 0; color: var(--text-muted); font-size: 0.75em; }
+.rv-import-errors { flex: 0 0 auto; padding: 0.5em 0.75em; border: 1px solid var(--text-error); border-radius: 0.375em; background: var(--background-modifier-error); color: var(--text-normal); font-size: 0.8125em; }
+.rv-import-errors ul { margin: 0.375em 0 0; padding-left: 1.25em; }
+.rv-import-applied-summary { flex: 0 0 auto; padding: 0.5em 0.75em; border: 1px solid var(--background-modifier-border); border-radius: 0.375em; background: var(--background-secondary); font-size: 0.8125em; }
+.rv-import-details-title { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-import-details-count { flex: none; color: var(--text-muted); font-size: 0.875em; font-weight: 400; }
+
+.rv-import-row { display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: baseline; gap: 0.25em 0.5em; padding: 0.375em 0.5em; border: 1px solid var(--background-modifier-border); border-radius: 0.375em; background: var(--background-primary); font-size: 0.8125em; }
+.rv-import-row-main { display: flex; align-items: baseline; gap: 0.375em; flex: 1 1 12em; min-width: 0; }
+.rv-import-status { flex: none; min-width: 4.5em; color: var(--text-muted); font-size: 0.625em; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+.rv-import-source, .rv-import-target { font-family: var(--font-monospace, monospace); word-break: break-all; }
+.rv-import-target { color: var(--text-muted); }
+.rv-import-arrow { flex: none; color: var(--text-faint); }
+.rv-import-message { flex-basis: 100%; color: var(--text-muted); font-size: 0.75em; }
+.rv-import-match, .rv-import-collision { flex: none; max-width: 12em; }
+.rv-import-candidates { flex-basis: 100%; margin: 0; padding-left: 1.25em; color: var(--text-muted); font-size: 0.75em; }
+
+/* Large imports can render thousands of preview rows. Let Chromium skip
+   style/layout/paint for rows outside the scroll viewport instead of paying
+   that cost for every row on each preview refresh. */
+.rv-import-row,
+.rv-import-folder-row,
+.rv-import-preset-row,
+.rv-import-reference-row {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 2.5em;
+}
+
+.rv-import-folder-row { padding: 0.25em 0; font-family: var(--font-monospace, monospace); font-size: 0.75em; word-break: break-all; }
+.rv-import-preset-row, .rv-import-reference-row { display: flex; flex: 0 0 auto; align-items: center; gap: 0.5em; padding: 0.3em 0; border-bottom: 1px solid var(--background-modifier-border); }
+.rv-import-preset-row:last-child, .rv-import-reference-row:last-child { border-bottom: none; }
+.rv-import-preset-action { flex: none; color: var(--text-muted); font-size: 0.625em; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; }
+.rv-import-preset-name, .rv-import-reference-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rv-import-preset-count { flex: none; color: var(--text-muted); font-size: 0.75em; font-variant-numeric: tabular-nums; }
+.rv-import-unresolved { flex: none; color: var(--text-error); font-size: 0.6875em; }
+.rv-import-availability { flex: none; color: var(--text-muted); font-size: 0.6875em; }
+.rv-import-availability.is-available { color: var(--text-success); }
+.rv-import-availability.is-unavailable { color: var(--text-error); }
+
+/* Row tones mirror the import preview status. */
+.rv-import-ready > .rv-import-status { color: var(--text-success); }
+.rv-import-move > .rv-import-status { color: var(--interactive-accent); }
+.rv-import-noop > .rv-import-status { color: var(--text-muted); }
+.rv-import-missing > .rv-import-status,
+.rv-import-invalid > .rv-import-status { color: var(--text-error); }
+.rv-import-ambiguous > .rv-import-status,
+.rv-import-conflict > .rv-import-status { color: var(--text-warning); }
+
+.rv-update-preset-modal { width: min(40em, 100%); max-width: min(40em, 100%); }
+.rv-update-preset-modal .modal-content { display: flex; flex-direction: column; min-height: 0; overflow-y: hidden; }
+body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-height: 18.75em; max-height: calc(85dvh - 2.5em); }
+.rv-update-preset-modal h2, .rv-update-preset-modal .setting-item-description { flex: 0 0 auto; }
+.rv-update-preset-row { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; margin-bottom: 0; }
+.rv-update-preset-list { flex: 1 1 auto; overflow-y: auto; min-height: 0; padding-right: 0.375em; padding-bottom: 0.75em; }
+.rv-update-preset-actions { flex: 0 0 auto; position: static; background-color: var(--modal-background, var(--background-primary)); padding-top: 1em; padding-bottom: 0; margin-top: 0; border-top: 1px solid var(--background-modifier-border); box-shadow: 0 -8px 16px -8px rgba(0, 0, 0, 0.2); justify-content: flex-end; }
+
+/* ---------- 9. Outlines ---------- */
+.rv-issues > ul.rv-outline-list, .rv-warnings > ul.rv-outline-list { padding: 0.75em 1em 1em !important; margin: 0 !important; list-style: none !important; }
+.rv-outline-list > li { margin-bottom: 1.25em; }
+.rv-outline-list > li:last-child { margin-bottom: 0; }
+.rv-outline-path { font-weight: 600; color: var(--text-normal); font-family: var(--font-monospace, monospace); word-break: break-all; margin-bottom: 0.5em; display: block; }
+.rv-outline-sublist { margin: 0; padding-left: 1em !important; border-left: 2px solid var(--interactive-accent); list-style: none !important; }
+.rv-outline-sublist > li { margin-bottom: 0.75em; }
+.rv-outline-sublist > li:last-child { margin-bottom: 0; }
+.rv-outline-header { font-family: var(--font-monospace, monospace); font-size: 0.75em; font-weight: 700; color: var(--text-muted); margin-bottom: 0.375em; text-transform: uppercase; letter-spacing: 0.04em; }
+.rv-outline-messages { margin: 0; padding-left: 1.25em !important; list-style: disc !important; font-size: 0.8125em; color: var(--text-muted); }
+.rv-outline-message { margin-bottom: 0.25em; line-height: 1.5; }
+
+/* Alert outlines: clickable note paths and the per-section copy button. */
+.rv-note-link { color: var(--text-accent); cursor: pointer; text-decoration: none; }
+.rv-note-link:hover { text-decoration: underline; }
+
+/* Alert header row: one line, count on the left, icon button on the right.
+   The native marker is replaced so the flex row cannot push it onto its own
+   line (the old block child caused exactly that). */
+.rv-start-mode .rv-issues > summary,
+.rv-start-mode .rv-warnings > summary {
+    display: flex; align-items: center; gap: 0.5em; list-style: none;
+}
+.rv-start-mode .rv-issues > summary::-webkit-details-marker,
+.rv-start-mode .rv-warnings > summary::-webkit-details-marker { display: none; }
+.rv-start-mode .rv-issues > summary::before,
+.rv-start-mode .rv-warnings > summary::before {
+    content: '▸'; flex: none; width: 0.625em;
+    color: var(--text-faint); font-size: 0.625em; line-height: 1;
+}
+.rv-start-mode .rv-issues[open] > summary::before,
+.rv-start-mode .rv-warnings[open] > summary::before { content: '▾'; }
+
+.rv-alert-summary { flex: 1 1 auto; display: flex; align-items: center; justify-content: space-between; gap: 0.75em; min-width: 0; }
+.rv-alert-summary > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Icon-only copy button, matching Obsidian's code-block copy affordance. */
+.rv-alert-copy { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 1.75em; height: 1.75em; padding: 0; border: none; border-radius: 0.25em; background: none; color: var(--text-muted); cursor: pointer; }
+.rv-alert-copy:hover { color: var(--text-normal); background: var(--background-modifier-hover); }
+.rv-alert-copy.is-copied { color: var(--text-success, var(--interactive-accent)); }
+.rv-alert-copy svg { width: 1em; height: 1em; }
+
+/* Shared copy button (see src/ui/CopyButton.ts). */
+.rv-copy-button { flex: none; }
+.rv-copy-button[disabled] { opacity: 0.5; cursor: default; }
+.rv-copy-button.is-copied { color: var(--text-success, var(--interactive-accent)); }
+.rv-copy-button-icon { display: inline-flex; align-items: center; justify-content: center; }
+.rv-clipboard-fallback { position: fixed; top: -9999px; left: -9999px; opacity: 0; }
+
+@keyframes rv-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rv-scale-in { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+
+/* ---------- 10. Media Queries ---------- */
+@media (max-width: 900px) {
+    .rv-quiz-layout.has-navigator { grid-template-columns: 1fr; }
+    .rv-navigator { position: static; max-height: 8.75em; margin-bottom: 0.75em; }    .rv-nav-grid { grid-template-columns: repeat(auto-fill, minmax(2.25em, 1fr)); }
+    .rv-start-mode .rv-sessions-list { grid-template-columns: 1fr; }
+    .rv-start-mode .rv-start-alerts { grid-template-columns: 1fr; }
+    .rv-start-mode .rv-start-alerts > .rv-start-section:only-child { grid-column: auto; }
+    .rv-start-mode .rv-session-config { grid-template-columns: 1fr; gap: 1em; padding: 1.125em; }
+    .rv-start-mode .rv-session-config .rv-span-2 { grid-column: auto; }
+    .rv-start-mode .rv-config-pairs { grid-column: auto; grid-template-columns: 1fr; gap: 1em; }
+    .rv-start-mode .rv-config-pairs > .rv-config-mode,
+    .rv-start-mode .rv-config-pairs > .rv-config-choice,
+    .rv-start-mode .rv-config-pairs > .rv-config-pres,
+    .rv-start-mode .rv-config-pairs > .rv-config-order,
+    .rv-start-mode .rv-config-pairs > .rv-config-numq,
+    .rv-start-mode .rv-config-pairs > .rv-config-trim,
+    .rv-start-mode .rv-config-pairs > .rv-config-submit,
+    .rv-start-mode .rv-config-pairs > .rv-config-grade { grid-column: auto; grid-row: auto; }
+    .rv-start-mode .rv-timer-config { grid-template-columns: 1fr; gap: 0.75em; }
+    .rv-start-mode .rv-timer-config h4, .rv-start-mode .rv-timer-config .rv-timer-warning-note { grid-column: auto; }
+    .rv-start-mode .rv-seed-row .rv-config-hint { flex-basis: 100%; }
+    .rv-history-workspace { grid-template-columns: 1fr; grid-template-rows: minmax(0, 0.4fr) minmax(0, 0.6fr); }
+    .rv-history-list { max-height: none; }
+    .rv-history-detail { overflow: hidden; padding: 0.75em 0 0; border-top: var(--rv-bw) solid var(--background-modifier-border); border-left: 0; }
+    
+    .rv-config-text, .rv-config-number, .rv-config-timer-input, .rv-config-timer-warn, .rv-editor-input, .rv-editor textarea, .rv-import-json, .rv-history-search, .rv-history-date, .rv-import-mode-row select { font-size: 1em !important; }
+    .rv-root { padding-left: max(1em, env(safe-area-inset-left, 0px)); padding-right: max(1em, env(safe-area-inset-right, 0px)); }
+}
+
+@media (max-width: 720px) {
+    .rv-start-mode .rv-start-header { flex-direction: column; align-items: stretch; gap: 0.25em; padding-top: 0.25em; padding-bottom: 0.5em; }
+    .rv-start-mode .rv-start-header h2 { flex: 0 0 auto; margin: 0; text-align: center; }
+    .rv-start-mode .rv-start-actions { justify-content: stretch; }
+    .rv-start-mode .rv-start-actions button { flex: 1 1 0; }
+    .rv-start-mode .rv-start-status { flex-direction: column; gap: 0.125em; }
+    .rv-start-mode .rv-start-status p { text-align: center; }
+    .rv-start-mode .rv-session-presets { align-items: stretch; }
+    .rv-start-mode .rv-session-presets .rv-config-label, .rv-start-mode .rv-session-preset-row { flex-basis: 100%; }
+    .rv-start-mode .rv-config-row .rv-mode { flex: 1 1 45%; white-space: normal; }
+}
+
+@media (max-width: 700px) {
+    .rv-history-modal { width: 100%; max-width: 100%; }
+    .rv-history-header { padding-bottom: 0.625em; }
+    .rv-history-footer, .rv-history-footer button, .rv-preset-footer, .rv-preset-footer button, .rv-history-filter-row > label { min-width: 0; }
+    .rv-history-search { flex: 1 1 100%; }
+    .rv-history-date { flex: 1 1 8.125em; }
+    .rv-history-row { flex-wrap: wrap; gap: 0.25em 0.5em; }
+    .rv-history-label { flex: 1 1 100%; order: -1; margin-bottom: 0.25em; }
+    .rv-history-row .rv-history-date, .rv-history-progress, .rv-history-flags, .rv-history-row .rv-session-status { flex: none; }
+}
+
+@media (max-width: 600px) {
+    .rv-nav-row { flex-wrap: wrap; }
+    .rv-nav-toggle { flex: 0 0 auto; }
+    .rv-import-mode-row { flex: 1 1 100%; margin-inline-start: 0; }
+    .rv-import-mode-row select { flex: 1 1 auto; min-width: 0; }
+    .rv-import-count-pill { min-height: 1.3125em; padding: 0.125em 0.375em; }
+    .rv-preset-row { flex-wrap: wrap; gap: 0.375em; }
+    .rv-preset-actions { flex-basis: 100%; justify-content: flex-end; }
+}
+
+@media (max-width: 480px) {
+    .rv-root { padding-bottom: 2em; }
+    .rv-card { padding: 1.125em min(1em, 5%); }
+    .rv-head { padding: 0.375em 0 0.625em; }
+    .rv-back, .rv-submit-all, .rv-display-toggle button, .rv-modal-actions button { min-height: 2.75em; }
+    .rv-editor { grid-template-columns: 1fr; }
+    .rv-nav-row { margin-bottom: 1em; }
+    .rv-root.rv-start-mode { padding-left: 0.75em; padding-right: 0.75em; padding-bottom: 0; }
+    .rv-start-mode .rv-session-config { padding: 1em 0.875em; }
+    .rv-start-mode .rv-start-actions { flex-direction: column; }
+    .rv-start-mode .rv-start-actions button { min-height: 2.75em; width: 100%; }
+    .modal:has(.rv-manage-modal) { width: 100%; max-width: 100%; }
+    .rv-manage-modal { padding: 0.5em 0.25em; }
+    .rv-manage-modal h2 { margin: 0 0 0.5em; font-size: 1.25em; }
+    .rv-manage-modal > .setting-item-description { margin: 0 0 0.625em; font-size: 0.75em; line-height: 1.35; }
+    .rv-manage-tree { min-height: 8em; max-height: none; padding: 0.375em; }
+    .rv-manage-toolbar { gap: 0.5em; margin-bottom: 0.5em; }
+    .rv-manage-tool { flex: 1 1 auto; min-height: 2.5em; font-size: 0.8125em; }
+    .rv-manage-selected { flex-basis: 100%; font-size: 0.75em; }
+    .rv-manage-preset-bar { margin-bottom: 0.5em; }
+    .rv-manage-modal .modal-button-container { padding-top: 0.625em; margin-top: 0.5em; gap: 0.5em; }
+    .rv-manage-modal .modal-button-container button { flex: 1 1 auto; min-height: 2.75em; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .rv-head { padding: 0.75em 0 1em; }
+    .rv-status { margin-bottom: 0.25em; }
+    .rv-card { padding: 1em min(1.25em, 5%); margin-bottom: 0.75em; }
+    .rv-q { margin-bottom: 0.875em; }
+    .rv-manage-tree { max-height: none; }
+    .rv-manage-modal > .setting-item-description { display: none; }
+}
+
+/* ============================================================
+   Mobile (phone) modal geometry
+   ------------------------------------------------------------
+   Obsidian's mobile shell already owns the viewport, the safe
+   areas, and the stacking of .modal-button-container. We stop
+   overriding that shell with 100vw/dvh math and instead:
+     - let .modal-container own a fluid, resolution-aware gutter,
+     - let .modal fill the space that gutter leaves,
+     - let .modal-content scroll instead of growing,
+     - keep our own action rows on one wrapping row.
+   Sizes are container-relative (never 100vw), so no descendant
+   can force a horizontal scrollbar on Android.
+   ============================================================ */
+:is(body.is-phone, .is-phone) {
+    --rv-modal-gutter-x: clamp(0.5rem, 3vmin, 1rem);
+    --rv-modal-gutter-y: clamp(0.5rem, 2.4vmin, 0.875rem);
+    /* Shared screen-relative padding for native and custom modal overlays. */
+    --rv-gutter-top: max(var(--rv-modal-gutter-y), var(--safe-area-inset-top, 0px), env(safe-area-inset-top, 0px));
+    --rv-gutter-right: max(var(--rv-modal-gutter-x), var(--safe-area-inset-right, 0px), env(safe-area-inset-right, 0px));
+    --rv-gutter-bottom: max(var(--rv-modal-gutter-y), var(--safe-area-inset-bottom, 0px), env(safe-area-inset-bottom, 0px));
+    --rv-gutter-left: max(var(--rv-modal-gutter-x), var(--safe-area-inset-left, 0px), env(safe-area-inset-left, 0px));
+}
+
+@media (orientation: landscape) {
+    :is(body.is-phone, .is-phone) {
+        /* Short landscape screens need wider side gutters to keep a usable column. */
+        --rv-modal-gutter-x: clamp(1rem, 6vmin, 2.5rem);
+    }
+}
+
+/* The container owns the outer margin. */
+:is(body.is-phone, .is-phone) :is(.modal-container, .rv-modal-overlay) {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: var(--rv-gutter-top) var(--rv-gutter-right) var(--rv-gutter-bottom) var(--rv-gutter-left);
+}
+:is(body.is-phone, .is-phone) .modal-container {
+    overflow: hidden;
+}
+
+/* The modal flexes inside that margin. Kept as a flex column so title,
+   content and footer share the height without fixed dvh values. */
+:is(body.is-phone, .is-phone) .modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: auto;
+    max-height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    border-radius: var(--modal-radius, var(--radius-l, 0.75em));
+}
+
+/* .modal-content is always the scroll container on phones. Screens that own a
+   flex layout keep `overflow-y: auto` instead of `hidden`, so the action row
+   (Cancel/Save) and the filter/list pane remain reachable on short screens.
+   `overscroll-behavior` keeps the page behind the dialog still. */
+:is(body.is-phone, .is-phone) .modal .modal-content {
+    flex: 1 1 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.75em 0.875em;
+    padding-bottom: max(0.75em, env(safe-area-inset-bottom, 0px));
+}
+
+/* Full-height plugin screens share one flex shape. `flex-basis: 0` makes the
+   shell take exactly the space the window-sized modal has, and `min-height: 0`
+   lets the inner scroll region shrink instead of pushing the footer out. */
+:is(body.is-phone, .is-phone) .modal .modal-content:is(
+    .rv-history-shell,
+    .rv-manage-modal,
+    .rv-session-detail-modal
+),
+:is(body.is-phone, .is-phone) .modal.rv-preset-manager-modal .modal-content,
+:is(body.is-phone, .is-phone) .modal.rv-update-preset-modal .modal-content {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    height: auto;
+    max-height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    container-type: size;
+    container-name: rv-dialog-content;
+}
+
+/* Mobile modals use the same flex geometry as desktop. Obsidian shrinks the
+   mobile window when the IME opens, so stretching the modal inside that window
+   is enough; no keyboard-height math is added on top. */
+:is(body.is-phone, .is-phone) .modal:has(.rv-manage-modal),
+:is(body.is-phone, .is-phone) .modal:has(.rv-session-detail-modal),
+:is(body.is-phone, .is-phone) .modal.rv-history-modal,
+:is(body.is-phone, .is-phone) .modal.rv-preset-manager-modal,
+:is(body.is-phone, .is-phone) .modal.rv-update-preset-modal {
+    flex: 1 1 auto;
+    align-self: stretch;
+    min-height: 0;
+    height: auto;
+    max-height: 100%;
+    margin-bottom: 0;
+}
+
+/* Entry prompts stay compact and centered, flexing only when the window is
+   shorter than the prompt itself. */
+:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    max-height: 100%;
+    margin-bottom: 0;
+}
+
+/* Entry prompts with a text field: the prompt is only as tall as its content,
+   so the actions sit in normal flow right after the field. Nothing reserves a
+   keyboard-height band (core's `.mod-form` margin) and nothing pins the footer
+   with an 8em spacer — either one leaves a dead gap when the window has already
+   been reduced for the IME. If the prompt is taller than the window, the
+   content scrolls and the actions remain reachable at the end of the scroll. */
+:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content {
+    position: static;
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content > * {
+    flex: 0 0 auto;
+}
+:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content > .modal-button-container {
+    position: static;
+    inset: auto;
+    margin: 0.75em 0 0;
+    padding: 0.5em 0 max(0.5em, env(safe-area-inset-bottom, 0px));
+    border-top: var(--border-width, 1px) solid var(--background-modifier-border);
+}
+
+/* Mobile navigator: compact strip, not a main panel. The title is hidden and
+   the height stays at ~3 rows so the question/answer keeps the screen. */
+:is(body.is-phone, .is-phone) .rv-navigator {
+    max-height: min(10em, 42dvh);
+}
+:is(body.is-phone, .is-phone) .rv-nav-cell {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    font-size: 0.75em;
+}
+:is(body.is-phone, .is-phone) .rv-navigator .rv-nav-title {
+    display: none;
+}
+:is(body.is-phone, .is-phone) .rv-nav-legend {
+    font-size: 0.6875em;
+}
+
+/* Typed answers: the desktop-sized input + full preview pushed Submit too far
+   down. Keep a compact editor on phones; the preview grows/scrolls. */
+:is(body.is-phone, .is-phone) .rv-editor-input {
+    min-height: 4.5em;
+}
+:is(body.is-phone, .is-phone) .rv-editor-preview {
+    min-height: 2.5em;
+    max-height: 10em;
+    overflow-y: auto;
+}
+
+/* Keep the Apply/import footer visible while the preview scrolls. */
+:is(body.is-phone, .is-phone) .rv-preset-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: auto;
+    padding-bottom: max(0.5em, env(safe-area-inset-bottom, 0px));
+    background: var(--modal-background, var(--background-primary));
+}
+:is(body.is-phone, .is-phone) .modal.mod-settings .rv-preset-footer {
+    background: var(--settings-background, var(--modal-background, var(--background-primary)));
+}
+
+/* Our settings sub-pages stretch with the same mobile window/flex geometry. */
+:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-import-host),
+:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-preset-body) {
+    flex: 1 1 auto;
+    align-self: stretch;
+    height: auto;
+    max-height: 100%;
+    /* Core gives mod-sidebar-layout `margin-top:auto`; an auto margin would
+       absorb the free space and stop align-self:stretch from filling it. */
+    margin: 0;
+}
+
+/* Keep the close affordance clear of long titles. */
+:is(body.is-phone, .is-phone) .modal .modal-close-button { z-index: 30; }
+:is(body.is-phone, .is-phone) .modal h2:first-child { padding-right: 2.5em; }
+:is(body.is-phone, .is-phone) .rv-modal-with-cancel .modal-close-button { display: flex; }
+
+/* Buttons: Obsidian stacks .modal-button-container into a column on phones.
+   Keep that shape, but never let a button take the container's height —
+   flex: 1 1 100% in that column is what produced one giant button. */
+:is(body.is-phone, .is-phone) .modal .modal-button-container {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0.5em;
+    width: 100%;
+    min-width: 0;
+    margin-top: 0.75em;
+    padding-bottom: max(0.25em, env(safe-area-inset-bottom, 0px));
+}
+
+:is(body.is-phone, .is-phone) .modal .modal-button-container > button {
+    flex: 0 0 auto;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 2.75em;
+    margin: 0;
+    padding-inline: 0.875em;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+/* Detail actions use a compact 3-column grid on phones so six buttons fit in
+   two rows instead of three uneven rows that overflow the detail pane. */
+:is(body.is-phone, .is-phone) .modal .modal-button-container.rv-detail-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5em;
+    padding: 0.5em 0.75em 0.25em;
+}
+
+:is(body.is-phone, .is-phone) .modal .modal-button-container.rv-detail-actions > button {
+    min-width: 0;
+    width: 100%;
+    min-height: 2.25em;
+    padding: 0.4em 0.25em;
+    font-size: 0.8125em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Single Close footer keeps a full-width row. */
+:is(body.is-phone, .is-phone) .modal .modal-button-container.rv-history-footer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5em;
+}
+
+/* Footer sections are the last child of their dialog: dock them to the modal
+   view itself. No IME-derived margin, no sticky offset, no spacer — the
+   scrollable body above takes exactly the space that is left. */
+:is(body.is-phone, .is-phone) .modal .modal-button-container.rv-history-footer {
+    margin: 0;
+    padding: 0.5em 0 max(0.25em, env(safe-area-inset-bottom, 0px));
+    border-top: var(--border-width, 1px) solid var(--background-modifier-border);
+}
+
+/* The footer now owns the bottom safe-area inset, so the scroll container must
+   not reserve a second one below it (that showed as a dead band under the
+   buttons). */
+:is(body.is-phone, .is-phone) .modal .modal-content.rv-history-shell,
+:is(body.is-phone, .is-phone) .modal .modal-content.rv-manage-modal,
+:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content {
+    padding-bottom: 0;
+}
+
+:is(body.is-phone, .is-phone) .rv-manage-modal .modal-button-container {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    /* The tree is capped by its own max-height, so the column can have free
+       space left over. Pull the footer through that space so it sits on the
+       modal's bottom edge instead of floating above a gap. */
+    margin: auto 0 0;
+    padding: 0.5em 0 max(0.25em, env(safe-area-inset-bottom, 0px));
+    border-top: var(--border-width, 1px) solid var(--background-modifier-border);
+    background: var(--modal-background, var(--background-primary));
+}
+
+:is(body.is-phone, .is-phone) .modal .modal-button-container.rv-history-footer > button {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 6em;
+    height: auto;
+}
+
+/* Empty preset lists still use the full-height card, so keep the host
+   flexible rather than letting it collapse above the empty message. */
+:is(body.is-phone, .is-phone) .modal.rv-preset-manager-modal .rv-preset-modal-host {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* History rows: readable on a phone and never squeezed by the flex list. */
+:is(body.is-phone, .is-phone) .rv-history-filter-row,
+:is(body.is-phone, .is-phone) .rv-history-filter-row > label { font-size: 0.8125em; }
+:is(body.is-phone, .is-phone) .rv-history-chip { font-size: 0.75em; }
+:is(body.is-phone, .is-phone) .rv-history-row { flex: 0 0 auto; align-items: flex-start; font-size: 0.8125em; }
+:is(body.is-phone, .is-phone) .rv-history-row .rv-history-label > span:first-child { font-size: 0.9375em; }
+:is(body.is-phone, .is-phone) .rv-history-row .rv-history-date,
+:is(body.is-phone, .is-phone) .rv-history-progress,
+:is(body.is-phone, .is-phone) .rv-history-flags { font-size: 0.75em; }
+:is(body.is-phone, .is-phone) .rv-history-row .rv-session-status { font-size: 0.6875em; }
+:is(body.is-phone, .is-phone) .rv-history-label { align-self: stretch; }
+:is(body.is-phone, .is-phone) .rv-history-list { padding-right: 0; }
+
+/* Short viewport (compact device or landscape): the body is a fixed-size flex
+   column whose own regions scroll. It must NOT grow to its children's
+   minimums — with `flex: 1 1 auto` and an 18em workspace the body measured
+   taller than the dialog and its last rows rendered on top of the footer. */
+:is(body.is-phone, .is-phone) .rv-history-body {
+    flex: 1 1 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+/* On a short phone the detail pane can be smaller than its action grid.
+   Let the whole pane scroll instead of clipping the lower actions. */
+:is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-detail {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+:is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-detail > .rv-session-detail {
+    flex: 0 0 auto;
+}
+:is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-detail .rv-session-detail-actions {
+    position: static;
+}
+
+/* A short dialog (compact device or landscape, or a phone whose window has
+   already been reduced by the IME) must not let the header, filter rows and
+   Close footer eat the whole box. The query reacts to the dialog's own size
+   (`cqh` comes from `.rv-history-shell`); it never looks at the keyboard
+   height, because the window already accounts for it. */
+@container rv-dialog-content (max-height: 480px) {
+    /* The title and the search field are enough context to filter; the
+       description is the first thing to go. */
+    :is(body.is-phone, .is-phone) .rv-history-header {
+        padding-bottom: 0.375em;
+    }
+    :is(body.is-phone, .is-phone) .rv-history-header h2 {
+        margin-bottom: 0;
+        font-size: 1.125em;
+    }
+    :is(body.is-phone, .is-phone) .rv-history-header p {
+        display: none;
+    }
+
+    /* Filters are normal blocks in one scroll column, not a second scroll box
+       competing with the results. */
+    :is(body.is-phone, .is-phone) .rv-history-filters {
+        max-height: none;
+        overflow: visible;
+        padding-bottom: 0.375em;
+    }
+    :is(body.is-phone, .is-phone) .rv-history-body {
+        padding-top: 0.375em;
+    }
+
+    /* While the search field has focus, the chip/date rows give up their space
+       entirely: on a short dialog the search field plus those rows would still
+       leave no room for results. The rows come back as soon as the field loses
+       focus, and the body scrolls to reach them. The plugin toggles
+       `.is-focused`; focus is user state, not keyboard state. */
+    :is(body.is-phone, .is-phone) .rv-history-filters:has(.rv-history-search.is-focused) {
+        flex: 0 0 auto;
+        padding-bottom: 0.375em;
+    }
+    :is(body.is-phone, .is-phone) .rv-history-filters:has(.rv-history-search.is-focused) > .rv-history-filter-row:not(:first-child),
+    :is(body.is-phone, .is-phone) .rv-history-filters:has(.rv-history-search.is-focused) > .rv-history-filter-row:first-child > label {
+        display: none;
+    }
+
+    /* One scroll column: rows and the detail pane follow the filters in the
+       body scroller instead of each sizing against a zero-height split. */
+    :is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-workspace {
+        display: block;
+        min-height: 0;
+    }
+    :is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-list {
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+    }
+    :is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-detail {
+        overflow: visible;
+        margin-top: 0.5em;
+    }
+    :is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-footer {
+        padding-top: 0.375em;
+    }
+}
+/* Tall enough to split list/detail: reserve at least one real row of results
+   above the footer, and let the body clip cleanly when it is shorter. */
+@container rv-dialog-content (min-height: 481px) {
+    :is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-workspace {
+        min-height: min(18em, max(7em, calc(100% - 24em)));
+        min-height: min(18em, max(7em, calc(100cqh - 24em)));
+    }
+}
+/* Manage questions on a short dialog: the description and the extra toolbar
+   rhythm are the first things to give way so the tree and Apply stay in view.
+   As above, the dialog's own (already IME-reduced) height is the only input. */
+@container rv-dialog-content (max-height: 480px) {
+    :is(body.is-phone, .is-phone) .rv-manage-modal h2 {
+        margin-bottom: 0.375em;
+        font-size: 1.125em;
+    }
+    :is(body.is-phone, .is-phone) .rv-manage-modal > .setting-item-description {
+        display: none;
+    }
+    :is(body.is-phone, .is-phone) .rv-manage-toolbar {
+        margin-bottom: 0.375em;
+    }
+    :is(body.is-phone, .is-phone) .rv-manage-summary {
+        margin-bottom: 0.25em;
+    }
+    :is(body.is-phone, .is-phone) .rv-manage-tree {
+        min-height: min(8em, 28cqh);
+    }
+    :is(body.is-phone, .is-phone) .rv-manage-modal .modal-button-container {
+        margin-top: 0.375em;
+        padding-top: 0.375em;
+    }
+}
+
+/* Keep the focused search field clear of the dialog edge when the WebView pans. */
+:is(body.is-phone, .is-phone) .rv-history-search {
+    scroll-margin-top: 3em;
+    scroll-margin-bottom: 3em;
+}
+
+/* Settings-page preset import/export: fill the page on desktop and mobile, so
+   the preview grows and the Apply footer sits at the bottom instead of
+   floating in the middle with empty space underneath. */
+.modal.mod-settings .setting-page:has(.rv-import-host),
+.modal.mod-settings .setting-page:has(.rv-preset-body) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.modal.mod-settings .setting-page-content:has(> .rv-import-host),
+.modal.mod-settings .setting-page-content:has(> .rv-preset-body) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    box-sizing: border-box;
+}
+
+.modal.mod-settings .setting-page-content > :is(.rv-import-host, .rv-preset-body) {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Dialog-scoped flex fixes for the Manage questions and Session detail
+   screens. Their minimums are em-based on desktop; on a short phone the
+   available height can be smaller than the minimum, and a flex child that
+   cannot shrink (the tree, the detail body) pushes the Apply/action row past
+   the modal edge. Cap them against the dialog's own box instead. */
+:is(body.is-phone, .is-phone) .rv-manage-tree {
+    /* Keep the tree readable instead of collapsing to a few pixels, but let it
+       shrink with the dialog on very short screens. */
+    min-height: 8em;
+    min-height: min(8em, 30cqh);
+    /* Percentages resolve against the modal-content flex box if container
+       units are unavailable; cqh tracks the dialog's real content box. */
+    max-height: min(
+        55%,
+        28.75em,
+        max(6em, calc(100% - 18em))
+    );
+    max-height: min(
+        55cqh,
+        28.75em,
+        max(6em, calc(100cqh - 18em))
+    );
+}
+/* Only the standalone detail modal reserves a readable body. Inside the
+   history detail pane the body must be able to collapse and scroll instead of
+   pushing the action grid out of the pane. */
+:is(body.is-phone, .is-phone) .rv-session-detail-modal > .rv-session-detail > .rv-session-detail-body {
+    min-height: 6em;
+}
+
+/* Core scopes two raw-keyboard paddings to settings modals. The mobile window
+   already shrinks for the IME, so applying the IME height again inside the page
+   would push content out of the dialog. Neutralize both for this plugin's
+   settings tab. */
+.modal.mod-settings .setting-page.vertical-tab-content:has(.rv-import-host),
+.modal.mod-settings .setting-page.vertical-tab-content:has(.rv-preset-body) {
+    padding-bottom: max(0.5em, env(safe-area-inset-bottom, 0px));
+}
+:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-settings-tab) .setting-page.vertical-tab-content {
+    padding-bottom: max(0.5em, env(safe-area-inset-bottom, 0px));
+}
+:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-settings-tab) .vertical-tab-header:after {
+    height: max(100px, env(safe-area-inset-bottom, 0px));
+}
+
+/* The preview gives way to the footer on short screens; the pane scrolls
+   instead of letting Apply import fall outside the dialog. */
+:is(body.is-phone, .is-phone) .rv-import-preview {
+    flex: 1 1 0;
+    min-height: 2em;
+    overflow: hidden;
+}
+:is(body.is-phone, .is-phone) .modal .rv-preset-modal-host,
+:is(body.is-phone, .is-phone) .modal .rv-import-host {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+/* Date + category: two date fields on one grid row, category underneath. */
+@media (max-width: 700px) {
+    .rv-history-filter-row:has(.rv-history-date) {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+        align-items: center;
+        column-gap: 0.375em;
+        row-gap: 0.25em;
+    }
+    .rv-history-filter-row:has(.rv-history-date) > label:last-of-type {
+        grid-column: 1 / 2;
+        margin-top: 0.25em;
+        min-width: 0;
+    }
+    .rv-history-filter-row:has(.rv-history-date) > .rv-history-category {
+        grid-column: 2 / -1;
+        width: 100%;
+        min-width: 0;
+        margin-top: 0.25em;
+    }
+    .rv-history-filter-row:has(.rv-history-date) > .rv-history-date {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+/* Custom (non-Obsidian) confirm overlay uses the same screen-relative gutter. */
+:is(body.is-phone, .is-phone) .rv-modal {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    max-height: 100%;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+/* Keep wide start-screen sections from forcing the mobile pane wider than the viewport. */
+:is(body.is-phone, .is-phone) .rv-start-mode .rv-start-header {
+    padding-left: max(0.75em, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75em, env(safe-area-inset-right, 0px));
+    flex-wrap: wrap;
+}
+:is(body.is-phone, .is-phone) .rv-start-mode .rv-start-body {
+    padding-left: max(0.75em, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75em, env(safe-area-inset-right, 0px));
+    padding-bottom: calc(3em + env(safe-area-inset-bottom, 0px));
+    overflow-anchor: none;
+}
+:is(body.is-phone, .is-phone) .rv-start-mode .rv-start-section-head { flex-wrap: wrap; gap: 0.375em; }
+:is(body.is-phone, .is-phone) .rv-start-mode .rv-session-config { padding: 0.875em; }
+:is(body.is-phone, .is-phone) .rv-root {
+    padding-left: max(0.75em, env(safe-area-inset-left, 0px));
+    padding-right: max(0.75em, env(safe-area-inset-right, 0px));
+}
+:is(body.is-phone, .is-phone) .rv-card { padding: 1em 0.875em; }
+
+@media (max-width: 900px), (pointer: coarse) {
+    .rv-session-preset-row .rv-mode,
+    .rv-chip-row-toggle,
+    .rv-preset-action,
+    .rv-config-row .rv-mode,
+    .rv-start-mode .rv-config-row .rv-mode { min-height: 2.75em; }
+    .rv-manage-preset-row .rv-mode,
+    .rv-manage-preset-row .rv-chip-row-toggle,
+    .rv-manage-tool,
+    .rv-preset-tool { min-height: 2.5em; }
+}
+
+@media (max-height: 560px) {
+    .rv-import-details-body { max-height: 14vh; }
+    .rv-import-json { max-height: 22vh; }
+}
+@media (max-height: 700px) {
+    .rv-import-preview { overflow: hidden; }
+    .rv-import-files { flex: 0 0 auto; min-height: 0; }
+    .rv-import-files-body { max-height: none; }
+}
+
+.rv-head, .rv-start-header { padding-top: max(0.25em, env(safe-area-inset-top, 0px)); }
+.rv-manage-modal .modal-button-container, .rv-preset-footer, .rv-update-preset-actions {
+    padding-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+}
+
+/* ============================================================
+   Phone modals: trust the window, never the IME value
+   ------------------------------------------------------------
+   On mobile the dialog container is sized to the visible window;
+   the IME is already excluded from that height. Re-adding the
+   keyboard height (core's `.mod-form` footer margin) or sizing the
+   content from `dvh` double-counts it and leaves the content
+   stranded at the top of a taller box. Keep the dialog on flex:
+   the content fills the host, and any IME-derived footer margin is
+   neutralized.
+   ============================================================ */
+:is(body.is-phone, .is-phone) .modal.mod-form .modal-button-container {
+    margin-bottom: 0;
+    padding-bottom: max(0.25em, env(safe-area-inset-bottom, 0px));
+}
+
+:is(body.is-phone, .is-phone) .modal .modal-content.rv-history-shell,
+:is(body.is-phone, .is-phone) .modal .modal-content.rv-manage-modal,
+:is(body.is-phone, .is-phone) .modal .modal-content.rv-session-detail-modal,
+:is(body.is-phone, .is-phone) .modal.rv-preset-manager-modal .modal-content,
+:is(body.is-phone, .is-phone) .modal.rv-update-preset-modal .modal-content {
+    height: auto;
+    flex: 1 1 0;
+    max-height: 100%;
+}
+
+/* ============================================================
+   Embedded sessions (` ```active-review ` outside the review root)
+   ============================================================ */
+.rv-embed.rv-root {
+    container-type: inline-size;
+    /* Tune the embedded scrollport here. */
+    --rv-embed-max-height: 85dvh;
+    padding: 0 0 1em;
+    /* No top margin: the sticky quiz header must sit flush with the note.
+       The inline margin is the additional 3% inset on each side. */
+    margin: 0 3% 1em;
+}
+
+/* The quiz gets its own scrollport so the note's scroll and the quiz's
+   sticky header never fight. The start card stays in normal note flow. */
+.rv-embed.rv-embed-quiz {
+    max-height: min(var(--rv-embed-max-height), 52em);
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    padding: 0 var(--size-4-3) 1em;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-l);
+    background-color: var(--background-primary);
+}
+
+.rv-embed .rv-embed-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--size-4-2);
+    padding: var(--size-4-6);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: var(--radius-l);
+    background-color: var(--background-secondary);
+}
+
+.rv-embed .rv-embed-message.rv-md > *:first-child,
+.rv-embed .rv-embed-message.rv-md > *:last-child {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.rv-embed .rv-embed-title {
+    margin: 0;
+    text-align: left;
+    font-size: var(--h3-size, 1.25em);
+}
+
+.rv-embed .rv-embed-submessage {
+    margin: 0;
+    color: var(--text-muted);
+}
+
+.rv-embed .rv-embed-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--size-4-1) var(--size-4-3);
+    color: var(--text-muted);
+    font-size: var(--font-ui-smaller, 0.8em);
+}
+
+.rv-embed .rv-embed-meta > span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5em;
+}
+
+.rv-embed .rv-embed-errors {
+    padding: var(--size-4-3);
+    border: 1px solid var(--background-modifier-error-border, var(--background-modifier-border));
+    border-radius: var(--radius-m);
+    background-color: var(--background-modifier-error, var(--background-secondary));
+    color: var(--text-error, var(--text-normal));
+    font-size: var(--font-ui-smaller, 0.8em);
+}
+
+.rv-embed .rv-embed-errors ul,
+.rv-embed .rv-embed-notes ul {
+    margin: var(--size-4-1) 0 0;
+    padding-left: 1.25em;
+}
+
+.rv-embed .rv-embed-notes {
+    font-size: var(--font-ui-smaller, 0.8em);
+    color: var(--text-muted);
+}
+
+.rv-embed .rv-embed-notes > summary {
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+.rv-embed .rv-embed-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--size-4-2);
+    margin-top: var(--size-4-1);
+}
+
+.rv-embed .rv-embed-banner {
+    padding: var(--size-4-2) var(--size-4-3);
+    border-left: 3px solid var(--text-warning, var(--interactive-accent));
+    border-radius: var(--radius-s);
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+    font-size: var(--font-ui-smaller, 0.8em);
+}
+
+/* The quiz view is already a full surface; let it blend into the note.
+   The small top padding lives inside the embed scrollport, so it reads as
+   breathing room rather than a gap against the note header. */
+.rv-embed.rv-embed-quiz .rv-head {
+    padding-top: var(--size-4-2);
+}
+
+/* Completion is a note-level result, not a fixed footer over the note. */
+.rv-embed .rv-done {
+    position: static;
+    margin-bottom: 0;
+}
+
+/* Natural-flow content: keep the navigator below the sticky header inside the
+   embedded scrollport, not pinned to the note viewport. */
+.rv-embed .rv-navigator {
+    top: 10em;
+    max-height: calc(var(--rv-embed-max-height) - 11em);
+}
+
+@container (max-width: 44em) {
+    .rv-embed .rv-quiz-layout.has-navigator {
+        grid-template-columns: 1fr;
+    }
+
+    .rv-embed .rv-navigator {
+        position: static;
+        max-height: 8.75em;
+        margin-bottom: var(--size-4-3);
+    }
+}

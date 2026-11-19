@@ -1,0 +1,20 @@
+import { run } from './harness';
+import './sections.test';
+import './importPreview.test';
+import './rename.test';
+import './answerSpec.test';
+import './parseNote.test';
+import './quantities.test';
+import './sessionScale.test';
+import './choiceCount.test';
+import './latex.test';
+import './currency.test';
+import './links.test';
+import './alertNotes.test';
+import './indexCodec.test';
+import './vaultIndexRuntime.test';
+import './sessionSync.test';
+import './adaptiveQueue.test';
+import './embed.test';
+
+void run();
