@@ -1,7 +1,7 @@
 {
 	"id": "active-review",
 	"name": "Active Review",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"minAppVersion": "1.13.0",
 	"description": "Turn Markdown notes into interactive quiz sessions with multiple-choice or typed answers, quantity-aware grading, presets, and local-only session history.",
 	"author": "QuillDedCodez",
