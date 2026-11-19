@@ -224,11 +224,32 @@ class TypedParser {
         this.skip();
         if (this.peek() === '^') {
             this.i++;
-            const exponent = this.parseUnary();
+            this.skip();
+            // Match the shared math evaluator: `x^{2}` and `x^(2)` mean the same thing.
+            const exponent = this.peek() === '{' ? this.parseBracedExponent() : this.parseUnary();
             if (typeof exponent !== 'number') throw new Error('quantity exponent must be a number');
             value = powerValues(value, exponent);
         }
         return value;
+    }
+
+    private parseBracedExponent(): Value {
+        this.i++; // '{'
+        const start = this.i;
+        let depth = 1;
+        while (depth > 0 && this.i < this.source.length) {
+            const ch = this.source[this.i]!;
+            if (ch === '{') depth++;
+            else if (ch === '}') {
+                depth--;
+                if (depth === 0) break;
+            }
+            this.i++;
+        }
+        if (depth !== 0) throw new Error('missing "}" after "^" in quantity expression');
+        const inner = this.source.slice(start, this.i);
+        this.i++; // '}'
+        return new TypedParser(inner, this.values).parse();
     }
 
     private parseUnary(): Value {

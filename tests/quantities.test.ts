@@ -234,6 +234,23 @@ test('quantity arithmetic propagates units', () => {
     assert.equal(fmtQuantityValue(resolved.values.e as QuantityValue), '2 m');
 });
 
+test('quantity arithmetic accepts LaTeX braced exponents', () => {
+    const list = defs([
+        'U = 2; ; "m/s"',
+        'A = 3; ; "m/s^2"',
+        'P = 1; ; "s"',
+        'Q = 4; ; "s"',
+        'D = U * (Q - P) + 0.5 * A * (Q^{2} - P^{2})',
+    ].join('\n'));
+    const resolved = resolve(list, {});
+    assert.equal(fmtQuantityValue(resolved.values.D as QuantityValue), '28.5 m');
+
+    const nested = defs('a = 2; ; "m"\nb = a^{1 + 1}\nc = a^{2^{1}}');
+    const nestedResolved = resolve(nested, {});
+    assert.equal(fmtQuantityValue(nestedResolved.values.b as QuantityValue), '4 m^2');
+    assert.equal(fmtQuantityValue(nestedResolved.values.c as QuantityValue), '4 m^2');
+});
+
 test('display uses min-sigfigs while max-sigfigs only caps acceptance', () => {
     const p = policy('m', 3, 5);
     assert.equal(fmtQuantity(1.25678, p), '1.26 m');
