@@ -4,9 +4,10 @@
  * - FoldersPage (review folder + session folder)
  * - FolderSuggest, SessionFolderSuggest (moved from suggesters.ts)
  */
-import { AbstractInputSuggest, Setting, SettingPage, TFolder, normalizePath, type App } from 'obsidian';
+import { AbstractInputSuggest, Setting, TFolder, normalizePath, type App } from 'obsidian';
 import { DEFAULT_SESSIONS_SUBDIR } from '../../constants';
 import type ReviewQuizPlugin from '../../main';
+import { RvSettingPage } from '../SettingsPageBase';
 
 // Suggesters
 
@@ -52,13 +53,13 @@ export class SessionFolderSuggest extends AbstractInputSuggest<string> {
 
 // AdvancedPage
 
-export class AdvancedPage extends SettingPage {
+export class AdvancedPage extends RvSettingPage {
     constructor(private plugin: ReviewQuizPlugin) {
         super();
         this.title = 'Advanced';
     }
 
-    display(): void {
+    protected renderPage(): void {
         this.containerEl.empty();
         new Setting(this.containerEl)
             .setName('Force show all warnings')
@@ -73,13 +74,13 @@ export class AdvancedPage extends SettingPage {
 
 // FoldersPage
 
-export class FoldersPage extends SettingPage {
+export class FoldersPage extends RvSettingPage {
     constructor(private plugin: ReviewQuizPlugin) {
         super();
         this.title = 'Folders';
     }
 
-    display(): void {
+    protected renderPage(): void {
         this.containerEl.empty();
         const app: App = this.plugin.app;
         let reviewDirInput = '';

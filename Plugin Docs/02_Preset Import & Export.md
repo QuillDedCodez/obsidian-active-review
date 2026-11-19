@@ -145,7 +145,7 @@ The fallback is effectively unreachable in normal use because the prompt rejects
 
 The manifest is written as pretty-printed JSON (2-space indent) to `<reviewDir>/<name>.json` through `app.vault.create`. If that path already exists, `-2`, `-3`, … are appended to the base until a free path is found. Notices: success `Saved <path>.`; failure `Could not save manifest: <message>`. The saved file is an ordinary vault file inside the review folder; the scanner ignores it because it does not end in `.md`.
 
-Copy feedback is separate: `Manage Questions manifest copied to clipboard.`, `Session preset manifest copied to clipboard.`, and the shared fallback `Could not copy to clipboard.` `CopyButton.copyText` first tries `navigator.clipboard.writeText`, then falls back to a hidden textarea and `execCommand('copy')`.
+Copy feedback is separate: `Manage Questions manifest copied to clipboard.`, `Session preset manifest copied to clipboard.`, and the shared failure `Could not copy to clipboard.` `CopyButton.copyText` writes through `navigator.clipboard.writeText` and reports an error when the Clipboard API is unavailable or rejects the write.
 
 ## 5. Manage manifest schema and export
 
@@ -717,7 +717,7 @@ Export → import in the same or another vault:
 | `No session presets available to export.` | Session export pane with zero presets |
 | `Manage Questions manifest copied to clipboard.` | Manage copy succeeded |
 | `Session preset manifest copied to clipboard.` | Session copy succeeded |
-| `Could not copy to clipboard.` | Clipboard write and fallback both failed |
+| `Could not copy to clipboard.` | Clipboard write failed |
 | `Saved <path>.` | JSON written to the vault |
 | `Could not save manifest: <message>` | Vault create failed |
 | `Paste a manifest or load a JSON file, then choose Preview import.` | Empty preview panel |

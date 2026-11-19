@@ -25,14 +25,13 @@
 | Answer fence | ```` ```rv-answer ```` / ```` ```rv-answers ```` | Only under `## ANSWERS` |
 | Distractor fence | ```` ```rv-distract ```` / ```` ```rv-distractors ```` | Only under `## DISTRACTORS` |
 | Sections | `DEFINITIONS`, `QUESTIONS`, `ANSWERS`, `DISTRACTORS`, `EXPLANATIONS` | Case-insensitive names |
-| Value placeholder | `<<rv:val:NAME>>`, `<<rv:values:NAME>>` | Content sections |
-| Quantity placeholder | `<<rv:value:NAME>>` | Content sections |
+| Value placeholder (all spellings are aliases) | `<<rv:val:NAME>>`, `<<rv:values:NAME>>`, `<<rv:value:NAME>>` | Content sections |
 | Expression placeholder | `<<rv:expression:NAME>>` | Content sections |
 | Partial expression | `<<rv:expression:NAME:arg1:arg2>>` | Content sections |
 | Definition functions | `rand`/`random`, `pick`, `link` | `rv-def` |
 | Unit constructors | `unit("m")`, `prefixUnit("k")` | `rv-def` |
 
-Aliases: `rv-def`/`rv-definitions`, `rv-answer`/`rv-answers`, `rv-distract`/`rv-distractors`, `rand`/`random`, `val`/`values`.
+Aliases: `rv-def`/`rv-definitions`, `rv-answer`/`rv-answers`, `rv-distract`/`rv-distractors`, `rand`/`random`; `val`, `values`, and `value` placeholders are interchangeable (§13.1).
 
 ---
 
@@ -761,13 +760,17 @@ $$c = \sqrt{a^2 + b^2}$$
 | Placeholder | Resolves to |
 |---|---|
 | `<<rv:val:name>>` | Numeric value via `fmt()`, string verbatim, or a quantity if `name` is a quantity |
-| `<<rv:values:name>>` | Alias of `val` |
-| `<<rv:value:name>>` | Quantity text for a bound quantity; otherwise same as `val` |
+| `<<rv:values:name>>` | Alias of `val`; same rendering |
+| `<<rv:value:name>>` | Conventional spelling for a bound quantity; otherwise the same as `val` |
 | `<<rv:expression:name>>` | Expression source rendered canonically |
 | `<<rv:expression:name:var1:var2>>` | Source with only listed arguments substituted |
 
-The **declared data type of the definition** decides what each of the three
-flexible placeholders renders — six forms in total:
+`val`, `values`, and `value` take the same parser path: one extraction, one
+formatter, one answer-binding check. Only the declared data type and the
+presence of a binding change the rendering (§14.1).
+
+The **declared data type of the definition** decides what the value and
+expression placeholder families render — six forms in total:
 
 | Placeholder | Numeric definition | Quantity definition |
 |---|---|---|
@@ -782,7 +785,7 @@ flexible placeholders renders — six forms in total:
 | Numeric result | `<<rv:val:name>>` |
 | String-pick value | `<<rv:val:name>>` |
 | String-pick LaTeX source | `<<rv:expression:name>>` |
-| Quantity with unit | `<<rv:value:name>>` or `<<rv:val:name>>` when bound |
+| Quantity with unit | Any value placeholder when bound; `value` is conventional |
 | Quantity source with its unit | `<<rv:expression:name>>` |
 
 Names are exact and case-sensitive; `<<rv:val:Speed>>` does not match `speed`.
@@ -862,7 +865,8 @@ Example with `a=1`, `b=2`, `c=3`, `k=5`, `x=4`, `f = ax^{2} + bx + \var{k}3ac`:
 | Numeric/text | No `rv-answer` fence and no quantity binding | Prune blocks, then choose numeric or text |
 | Quantity/multi-value | `rv-answer` fence, or an accepted block uses a val bound to a quantity definition | Unit-aware quantity or multi-value grading |
 
-A quantity val alone is enough to enter the quantity path. The `rv-answer` fence
+A quantity value alone is enough to enter the quantity path; the placeholder
+name (`val` / `values` / `value`) does not matter (§13.1). The `rv-answer` fence
 is **optional**: without it, **every quantity binding used by an answer
 placeholder receives the default bounded constraint** — `unit-mode = expanded`,
 `display = atomic`, `prefix-policy = any`, `allowed-prefixes = auto`,
@@ -2436,8 +2440,10 @@ Notes:
 <<rv:expression:name:a:b>>
 ```
 
-The declared data type decides the rendering; both `expression` forms append
-the declared unit and prefix on a quantity definition (§13.1).
+The `val` / `values` / `value` placeholders are interchangeable; `value` is
+conventional for a bound quantity answer (§13.1). The declared data type decides
+the rendering; both `expression` forms append the declared unit and prefix on a
+quantity definition (§13.1).
 
 ### 35.2 Answer-key defaults
 

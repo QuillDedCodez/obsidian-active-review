@@ -40,7 +40,7 @@ export class CategorySyncModal extends Modal {
 
     onOpen(): void {
         const { contentEl } = this;
-        this.modalEl.addClass('rv-modal-with-cancel');
+        this.modalEl.addClass('rv-modal-with-cancel', 'rv-modal-manage');
         contentEl.empty();
         contentEl.addClass('rv-manage-modal');
         contentEl.createEl('h2', { text: this.options.title });

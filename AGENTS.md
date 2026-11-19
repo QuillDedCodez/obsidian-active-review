@@ -182,8 +182,12 @@ Release checklist:
 - Confirm `styles.css` is present and current.
 - Commit the submission folder, then create a GitHub release whose tag exactly
   matches `manifest.json`’s version (no leading `v`).
-- Attach `main.js`, `manifest.json`, and `styles.css` as individual release
-  assets.
+- Let the release workflow build and upload `main.js`, `manifest.json`, and
+  `styles.css` from the tagged source. Do not build or upload the assets by
+  hand: the workflow replaces them with its reproducible build and attests
+  their provenance.
+- The release name must include the version, for example
+  `Active Review 2.0.0`; the workflow sets this automatically.
 
 ## UX and copy
 

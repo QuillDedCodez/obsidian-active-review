@@ -1,15 +1,16 @@
 /** Active Review settings tab — declarative 1.13 API, one page per section. */
-import { PluginSettingTab, SettingPage, type App, type SettingDefinitionItem } from 'obsidian';
+import { PluginSettingTab, type App, type SettingDefinitionItem } from 'obsidian';
 import type ReviewQuizPlugin from '../main';
 import { AdvancedPage, FoldersPage } from './pages/GeneralPages';
 import { CategorySyncPage } from './pages/CategorySyncPage';
 import { SessionDefaultsPage } from './pages/SessionDefaultsPage';
 import { SessionPresetManager } from '../ui/presets/SessionPresets';
 import { QuestionPresetManager } from '../ui/presets/QuestionPresets';
+import { RvSettingPage } from './SettingsPageBase';
 
 // Preset page launchers (previously in PresetPages.ts)
 
-class SessionPresetsPage extends SettingPage {
+class SessionPresetsPage extends RvSettingPage {
     private manager: SessionPresetManager | null = null;
 
     constructor(private plugin: ReviewQuizPlugin) {
@@ -17,7 +18,10 @@ class SessionPresetsPage extends SettingPage {
         this.title = 'Manage Session Presets';
     }
 
-    display(): void {
+    protected renderPage(): void {
+        this.rootEl.addClass('rv-preset-settings-page');
+        this.containerEl.addClass('rv-preset-settings-content');
+        this.rootEl.closest('.modal')?.addClass('rv-preset-settings-modal');
         // Settings can be asked to redraw while a row is being held. Replacing
         // the manager then would abort the drag and leave nothing to drop.
         if (this.manager?.isReordering()) return;
@@ -38,7 +42,7 @@ class SessionPresetsPage extends SettingPage {
     }
 }
 
-class QuestionPresetsPage extends SettingPage {
+class QuestionPresetsPage extends RvSettingPage {
     private manager: QuestionPresetManager | null = null;
 
     constructor(private plugin: ReviewQuizPlugin) {
@@ -46,7 +50,10 @@ class QuestionPresetsPage extends SettingPage {
         this.title = 'Manage Question Presets';
     }
 
-    display(): void {
+    protected renderPage(): void {
+        this.rootEl.addClass('rv-preset-settings-page');
+        this.containerEl.addClass('rv-preset-settings-content');
+        this.rootEl.closest('.modal')?.addClass('rv-preset-settings-modal');
         if (this.manager?.isReordering()) return;
         this.manager?.destroy();
         this.containerEl.empty();

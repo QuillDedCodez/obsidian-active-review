@@ -182,6 +182,7 @@ export class TextPromptModal extends BaseRvModal {
     onOpen(): void {
         const { contentEl } = this;
         contentEl.empty();
+        this.modalEl.addClass('rv-config-prompt');
         contentEl.createEl('h2', { text: this.options.title });
         if (this.options.description) {
             contentEl.createEl('p', {

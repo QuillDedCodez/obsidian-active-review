@@ -586,7 +586,7 @@ function assignRound(r: Partial<RoundEntry>, key: string, val: string): void {
 function finalizeRound(r: Partial<RoundEntry>, fallbackCreated: string): RoundEntry {
     return {
         index: r.index ?? 1,
-        action: (r.action ?? 'initial') as RoundAction,
+        action: (r.action ?? 'initial'),
         started: r.started ?? fallbackCreated,
         ended: r.ended ?? null,
     };
@@ -699,10 +699,10 @@ function parseSnapshotBlock(lines: string[]): SessionSnapshot {
     }
 
     return {
-        presentation: (get('presentation') === 'one' ? 'one' : 'all') as 'all' | 'one',
+        presentation: (get('presentation') === 'one' ? 'one' : 'all'),
         choices: clampChoiceCount(numOr(get('choices'), def.choices)),
         count: countRaw === 'all' ? 'all' : numOr(countRaw, 0),
-        trim: (get('trim') === 'rand' ? 'rand' : 'seq') as 'seq' | 'rand',
+        trim: (get('trim') === 'rand' ? 'rand' : 'seq'),
         order,
         seed: numOr(get('seed'), 0),
         show: normalizedShow,

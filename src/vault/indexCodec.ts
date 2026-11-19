@@ -93,7 +93,7 @@ async function compress(text: string): Promise<ArrayBuffer> {
         return bytes.buffer.slice(
             bytes.byteOffset,
             bytes.byteOffset + bytes.byteLength,
-        ) as ArrayBuffer;
+        );
     }
     const stream = new Blob([bytes])
         .stream()
@@ -161,7 +161,7 @@ export async function decodeIndexData(
             if (typeof raw.mtime !== 'number' || typeof raw.size !== 'number') {
                 return null;
             }
-            const stored = raw.q as unknown as StoredQuestion | null;
+            const stored = raw.q as StoredQuestion | null;
             questions[path] = {
                 mtime: raw.mtime,
                 size: raw.size,

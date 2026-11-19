@@ -1,17 +1,18 @@
-import { Notice, Setting, SettingPage } from 'obsidian';
+import { Notice, Setting } from 'obsidian';
 import type ReviewQuizPlugin from '../../main';
+import { RvSettingPage } from '../SettingsPageBase';
 import { extractFolderCategory } from '../../parser';
 import { CategorySyncModal, type SyncEntry } from '../../ui/manage/CategorySyncModal';
 import { ConfirmModal } from '../../ui/Modals';
 import { applyCategorySync, applyFolderSync, planCategorySync, planFolderSync } from '../../vault';
 
-export class CategorySyncPage extends SettingPage {
+export class CategorySyncPage extends RvSettingPage {
     constructor(private plugin: ReviewQuizPlugin) {
         super();
         this.title = 'Category Sync';
     }
 
-    display(): void {
+    protected renderPage(): void {
         this.containerEl.empty();
         this.containerEl.createEl('p', {
             cls: 'setting-item-description',

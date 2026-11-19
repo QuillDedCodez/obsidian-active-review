@@ -138,7 +138,7 @@ export class ManageQuestionsModal extends Modal {
     }
 
     onOpen(): void {
-        this.modalEl.addClass('rv-modal-with-cancel');
+        this.modalEl.addClass('rv-modal-with-cancel', 'rv-modal-manage');
         this.render();
     }
 

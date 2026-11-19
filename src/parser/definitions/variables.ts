@@ -425,7 +425,7 @@ export function parseVars(
                 return { type: 'unit', unit: first.unit, prefix: first.prefix };
             }
             if (first && typeof first === 'object' && 'factors' in first) {
-                return { type: 'unit', unit: first as UnitExpr };
+                return { type: 'unit', unit: first };
             }
         }
         if (def.valueType === 'prefix') {
@@ -591,7 +591,7 @@ export function parseVars(
                                 prefix = value.prefix.symbol;
                             }
                         } else if (typeof value === 'object' && 'factors' in value) {
-                            unit = value as UnitExpr;
+                            unit = value;
                         } else if (typeof value === 'string') unit = parseUnitString(value);
                     } else {
                         unitRef = unitText;

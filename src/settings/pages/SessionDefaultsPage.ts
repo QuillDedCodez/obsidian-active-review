@@ -1,5 +1,5 @@
 /** Default settings used by new sessions. */
-import { Setting, SettingPage } from 'obsidian';
+import { Setting } from 'obsidian';
 import {
     MAX_CHOICE_COUNT,
     MIN_CHOICE_COUNT,
@@ -10,6 +10,7 @@ import {
     type TimerMode,
 } from '../../constants';
 import type ReviewQuizPlugin from '../../main';
+import { RvSettingPage } from '../SettingsPageBase';
 
 const SUBMIT_MODES: [SubmitMode, string][] = [
     ['any', 'Submit any'],
@@ -36,13 +37,13 @@ const CHOICE_OPTIONS: [string, string][] = Array.from(
     },
 );
 
-export class SessionDefaultsPage extends SettingPage {
+export class SessionDefaultsPage extends RvSettingPage {
     constructor(private plugin: ReviewQuizPlugin) {
         super();
         this.title = 'Session Defaults';
     }
 
-    display(): void {
+    protected renderPage(): void {
         this.containerEl.empty();
         const defaults = this.plugin.settings.sessionDefaults;
 
@@ -175,7 +176,7 @@ export class SessionDefaultsPage extends SettingPage {
      *  state of another control (e.g. timer mode → seconds field). */
     private async persistAndRefresh(patch: Partial<SessionConfig>): Promise<void> {
         await this.persist(patch);
-        this.display();
+        this.renderPage();
     }
 
     // ---------- Generic row builders ----------

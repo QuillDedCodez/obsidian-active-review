@@ -467,13 +467,12 @@ export function layoutImportPreview(preview: HTMLElement): void {
             ':scope > .rv-import-details-body',
         );
         if (item.open) {
-            item.setCssProps({ height: `${each}px` });
+            item.setCssProps({ '--rv-import-details-height': `${each}px` });
             if (body) {
                 const summary = item.querySelector<HTMLElement>(':scope > summary');
                 const bodyHeight = Math.max(0, each - (summary?.offsetHeight ?? 0));
                 body.setCssProps({
-                    height: `${bodyHeight}px`,
-                    'max-height': `${bodyHeight}px`,
+                    '--rv-import-details-body-height': `${bodyHeight}px`,
                 });
             }
         } else {
@@ -483,11 +482,11 @@ export function layoutImportPreview(preview: HTMLElement): void {
 }
 
 function clearDetailsHeight(item: HTMLDetailsElement): void {
-    item.setCssProps({ height: '' });
+    item.setCssProps({ '--rv-import-details-height': '' });
     const body = item.querySelector<HTMLElement>(
         ':scope > .rv-import-details-body',
     );
-    if (body) body.setCssProps({ height: '', 'max-height': '' });
+    if (body) body.setCssProps({ '--rv-import-details-body-height': '' });
 }
 
 export function renderImportWarnings(parent: HTMLElement, warnings: string[]): void {

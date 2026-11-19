@@ -20,19 +20,23 @@
     padding: 0 max(min(1.5em, 3%), calc((100% - 48.75em) / 2)) 2.5em;
     overflow-wrap: anywhere;
     overflow-x: clip;
-    font-size: var(--font-text-size, 1em) !important;
+    font-size: var(--font-text-size, 1em);
     line-height: 1.6;
     color: var(--text-normal);
     isolation: isolate;
-    padding-top: 0 !important;
-    user-select: text !important;
-    -webkit-user-select: text !important;
+}
+/* Higher specificity replaces the former forced overrides for the few
+   properties Obsidian's global view styles would otherwise override. */
+.rv-root.rv-root {
+    font-size: var(--font-text-size, 1em);
+    user-select: text;
+    -webkit-user-select: text;
 }
 
 .rv-root h2 { font-size: var(--h2-size, 1.6em); font-weight: 700; text-align: center; margin: 0 0 0.5em; }
 .rv-root h4 { font-size: var(--h4-size, 1.1em); text-align: center; font-weight: 600; margin: 1.25em 0 0.625em; }
 .rv-root p.rv-muted { text-align: center; color: var(--text-muted); font-size: 0.875em; margin: 0 0 1.25em; }
-.rv-hidden { display: none !important; }
+.rv-hidden.rv-hidden { display: none; }
 .rv-md > *:first-child { margin-top: 0; }
 .rv-md > *:last-child { margin-bottom: 0; }
 .rv-md p { margin: .25em 0; }
@@ -97,10 +101,10 @@
 .rv-back:hover { background: var(--background-modifier-hover); border-color: var(--interactive-accent); }
 
 .rv-config-label { display: block; font-weight: 600; font-size: 0.875em; margin-bottom: 0.375em; color: var(--text-normal); }
-.rv-config-text, .rv-config-number, .rv-config-timer-input, .rv-config-timer-warn {
+.rv-config-text.rv-config-text, .rv-config-number.rv-config-number, .rv-config-timer-input.rv-config-timer-input, .rv-config-timer-warn.rv-config-timer-warn {
     width: 100%; padding: 0.5em 0.625em; border: 1.5px solid var(--background-modifier-border);
     border-radius: 0.5em; background: var(--background-primary); color: var(--text-normal);
-    font-family: inherit; box-sizing: border-box; min-height: 2.375em; font-size: 1em !important;
+    font-family: inherit; box-sizing: border-box; min-height: 2.375em; font-size: 1em;
 }
 .rv-config-text:focus, .rv-config-number:focus, .rv-config-timer-input:focus, .rv-config-timer-warn:focus {
     border-color: var(--interactive-accent); outline: none;
@@ -280,7 +284,7 @@
 .rv-session-config input.rv-config-slider {
     flex: 1; min-width: 6.25em; height: 2.75em; padding: 0; border: none; box-sizing: border-box;
     -webkit-appearance: none; appearance: none; background: transparent;
-    accent-color: var(--interactive-accent); touch-action: pan-y; user-select: none !important; cursor: pointer;
+    accent-color: var(--interactive-accent); touch-action: pan-y; user-select: none; cursor: pointer;
 }
 .rv-session-config input.rv-config-slider:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 0.125em; border-radius: 0.375em; }
 .rv-session-config input.rv-config-slider::-webkit-slider-runnable-track {
@@ -408,15 +412,17 @@
 /* Long choice text: one column so each button gets the full card width. */
 .rv-choices.is-stacked { grid-template-columns: minmax(0, 1fr); }
 /* Measurement pass: width 0 + nowrap exposes the natural single-line width. */
-.rv-choices.is-measuring .rv-md { width: 0 !important; min-width: 0 !important; flex: 0 0 auto !important; }
-.rv-choices.is-measuring .rv-md, .rv-choices.is-measuring .rv-md * { white-space: nowrap !important; }
-.rv-choice { display: flex; align-items: flex-start; gap: 0.625em; min-width: 0; min-height: 3.25em; max-width: 100%; height: auto; white-space: normal; padding: 0.75em min(0.875em, 4%); background: var(--background-primary); border: 1.5px solid var(--background-modifier-border); border-radius: 0.625em; color: var(--text-normal); text-align: left; font-size: 1em; line-height: 1.4; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; user-select: text !important; box-sizing: border-box; }
+.rv-choices.is-measuring .rv-md.rv-md { width: 0; min-width: 0; flex: 0 0 auto; }
+.rv-choices.is-measuring .rv-md.rv-md, .rv-choices.is-measuring .rv-md.rv-md * { white-space: nowrap; }
+.rv-choice { display: flex; align-items: flex-start; gap: 0.625em; min-width: 0; min-height: 3.25em; max-width: 100%; height: auto; white-space: normal; padding: 0.75em min(0.875em, 4%); background: var(--background-primary); border: 1.5px solid var(--background-modifier-border); border-radius: 0.625em; color: var(--text-normal); text-align: left; font-size: 1em; line-height: 1.4; cursor: pointer; transition: border-color .15s, background .15s, box-shadow .15s; user-select: text; box-sizing: border-box; }
+.rv-choice.rv-choice { user-select: text; }
 .rv-choice:hover:not(:disabled) { background: var(--background-modifier-hover); border-color: var(--interactive-accent); }
 .rv-choice.is-picked { border-color: var(--interactive-accent); background: var(--background-modifier-hover); box-shadow: 0 0 0 1.5px var(--interactive-accent) inset; }
 .rv-choice.is-correct { border-color: var(--rv-correct); background: var(--background-modifier-success); }
 .rv-choice.is-wrong { border-color: var(--rv-wrong); background: var(--background-modifier-error); }
 .rv-choice:disabled { cursor: default; }
-.rv-letter { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 1.625em; height: 1.625em; border-radius: 50%; background: var(--background-modifier-border); color: var(--text-muted); font-size: 0.75em; font-weight: 700; transition: background .15s, color .15s; user-select: none !important; }
+.rv-letter { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 1.625em; height: 1.625em; border-radius: 50%; background: var(--background-modifier-border); color: var(--text-muted); font-size: 0.75em; font-weight: 700; transition: background .15s, color .15s; user-select: none; }
+.rv-letter.rv-letter { user-select: none; }
 .rv-choice.is-picked .rv-letter { background: var(--interactive-accent); color: var(--text-on-accent); }
 .rv-choice.is-correct .rv-letter { background: var(--rv-correct); color: var(--text-on-accent); }
 .rv-choice.is-wrong .rv-letter { background: var(--rv-wrong); color: var(--text-on-accent); }
@@ -425,7 +431,7 @@
 .rv-choice .rv-md p { margin: 0; }
 
 .rv-submit-row { display: flex; justify-content: flex-end; width: 100%; margin-top: 0.375em; }
-.rv-submit { display: inline-flex; align-items: center; justify-content: center; margin: 0 !important; min-height: 2.75em; height: auto; padding: 0.625em 1.75em; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 0.5em; font-size: 0.9375em; font-weight: 600; line-height: 1.3; text-align: center; box-sizing: border-box; cursor: pointer; transition: background .15s, opacity .15s; }
+.rv-submit.rv-submit { display: inline-flex; align-items: center; justify-content: center; margin: 0; min-height: 2.75em; height: auto; padding: 0.625em 1.75em; background: var(--interactive-accent); color: var(--text-on-accent); border: none; border-radius: 0.5em; font-size: 0.9375em; font-weight: 600; line-height: 1.3; text-align: center; box-sizing: border-box; cursor: pointer; transition: background .15s, opacity .15s; }
 .rv-submit:hover:not(:disabled) { background: var(--interactive-accent-hover); }
 .rv-submit:disabled { opacity: .5; cursor: not-allowed; }
 .rv-feedback { margin: 1em auto 0; padding: 0.75em min(1em, 4%); border-radius: 0.625em; border-left: 4px solid transparent; font-size: 1em; text-align: center; }
@@ -589,8 +595,8 @@ body:not(.is-phone) .rv-history-modal { height: min(90dvh, 53.75em); max-height:
 /* Manage questions: taller host, slightly looser button/section rhythm.
    Widths are container-relative (never 100vw) so the modal always stays inside
    .modal-container on phones, where Obsidian renders modals as bottom sheets. */
-.modal:has(.rv-manage-modal) { width: 100%; max-width: min(46em, 100%); box-sizing: border-box; }
-body:not(.is-phone) .modal:has(.rv-manage-modal) { height: min(86dvh, 44em); max-height: min(86dvh, 44em); }
+.modal.rv-modal-manage { width: 100%; max-width: min(46em, 100%); box-sizing: border-box; }
+body:not(.is-phone) .modal.rv-modal-manage { height: min(86dvh, 44em); max-height: min(86dvh, 44em); }
 /* Flex containment: no descendant can force the modal wider than the viewport. */
 .rv-manage-modal, .rv-manage-modal * { box-sizing: border-box; min-width: 0; }
 .rv-manage-modal { display: flex; flex-direction: column; width: 100%; max-width: 100%; height: 100%; min-height: 0; overflow-x: clip; --rv-manage-row-height: 1.875em; --rv-manage-control-height: 1.75em; }
@@ -664,11 +670,11 @@ body.rv-manage-dragging { user-select: none; -webkit-user-select: none; cursor: 
 
 .rv-import-host { display: flex; flex-direction: column; flex: 1 1 auto; width: 100%; min-height: 0; gap: 0.625em; overflow: hidden; }
 .rv-import-json-section { display: flex; flex-direction: column; flex: 0 0 auto; gap: 0.375em; min-height: 0; }
-.rv-import-json { width: 100%; min-height: 9.375em; box-sizing: border-box; resize: none; padding: 0.5em 0.625em; border: 1.5px solid var(--background-modifier-border); border-radius: 0.5em; background: var(--background-primary); color: var(--text-normal); font-family: var(--font-monospace, monospace); font-size: 1em !important; }
+.rv-import-json.rv-import-json { width: 100%; min-height: 9.375em; box-sizing: border-box; resize: none; padding: 0.5em 0.625em; border: 1.5px solid var(--background-modifier-border); border-radius: 0.5em; background: var(--background-primary); color: var(--text-normal); font-family: var(--font-monospace, monospace); font-size: 1em; }
 .rv-import-file-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5em; margin: 0; flex: 0 0 auto; width: 100%; }
 .rv-import-mode-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5em; margin: 0; margin-inline-start: auto; }
 .rv-import-mode-row label { font-size: 0.875em; color: var(--text-muted); }
-.rv-import-mode-row select { flex: 1 1 16.25em; min-height: 2.125em; font-size: 1em !important; }
+.rv-import-mode-row.rv-import-mode-row select { flex: 1 1 16.25em; min-height: 2.125em; font-size: 1em; }
 .rv-import-preview { display: flex; flex-direction: column; flex: 1 1 auto; gap: 0.4375em; min-height: 9.375em; margin: 0; padding: 0 0 0.5em; overflow: hidden; width: 100%; }
 .rv-import-counts { position: sticky; top: 0; z-index: 2; display: flex; flex: 0 0 auto; flex-wrap: wrap; align-items: center; gap: 0.3125em; padding: 0.125em 0 0.3125em; border-bottom: 1px solid var(--background-modifier-border); background: var(--modal-background, var(--background-primary)); }
 .rv-import-count-pill { display: inline-flex; align-items: baseline; gap: 0.25em; min-height: 1.375em; padding: 0.125em 0.4375em; border: 1px solid var(--background-modifier-border); border-radius: 999px; background: var(--background-secondary); font-size: 0.6875em; line-height: 1.2; white-space: nowrap; }
@@ -676,17 +682,17 @@ body.rv-manage-dragging { user-select: none; -webkit-user-select: none; cursor: 
 .rv-import-count-value { font-weight: 700; font-variant-numeric: tabular-nums; }
 .rv-import-count-label { color: var(--text-muted); font-size: 0.625em; }
 .rv-import-details { display: flex; flex-direction: column; flex: 0 0 auto; min-height: 0; border: 1px solid var(--background-modifier-border); border-radius: 0.4375em; background: var(--background-secondary); overflow: hidden; }
-.rv-import-details[open] { flex: 1 1 auto; }
+.rv-import-details[open] { flex: 1 1 auto; height: var(--rv-import-details-height, auto); }
 .rv-import-details-summary { flex: 0 0 auto; display: flex; align-items: center; gap: 0.375em; min-height: 1.875em; padding: 0.25em 0.5625em; list-style: none; cursor: pointer; font-size: 0.875em; font-weight: 600; user-select: none; }
 .rv-import-details-summary::-webkit-details-marker { display: none; }
 .rv-import-details-summary::before { content: '▸'; flex: none; width: 0.625em; color: var(--text-faint); font-size: 0.625em; line-height: 1; }
 .rv-import-details[open] > .rv-import-details-summary::before { content: '▾'; }
-.rv-import-details-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; max-height: none; padding: 0.3125em 0.5625em 0.5em; border-top: 1px solid var(--background-modifier-border); overflow-y: auto; overscroll-behavior: contain; }
+.rv-import-details-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; height: var(--rv-import-details-body-height, auto); max-height: var(--rv-import-details-body-height, none); padding: 0.3125em 0.5625em 0.5em; border-top: 1px solid var(--background-modifier-border); overflow-y: auto; overscroll-behavior: contain; }
 .rv-import-files-scroll { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; gap: 0.25em; padding-right: 0.25em; overflow-y: auto; }
 
 /* Widen the Obsidian modal host, not the content element, so the content can
    never exceed the modal and force a horizontal scrollbar. */
-.modal:has(.rv-session-detail-modal) { width: min(52em, 100%); max-width: min(52em, 100%); }
+.modal.rv-modal-session-detail { width: min(52em, 100%); max-width: min(52em, 100%); }
 .rv-session-detail-modal { box-sizing: border-box; width: 100%; max-width: 100%; max-height: 56em; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
 body:not(.is-phone) .rv-session-detail-modal { max-height: min(90dvh, 56em); }
 .rv-session-detail-modal h2 { flex: 0 0 auto; margin-top: 0; }
@@ -854,15 +860,15 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
 .rv-update-preset-actions { flex: 0 0 auto; position: static; background-color: var(--modal-background, var(--background-primary)); padding-top: 1em; padding-bottom: 0; margin-top: 0; border-top: 1px solid var(--background-modifier-border); box-shadow: 0 -8px 16px -8px rgba(0, 0, 0, 0.2); justify-content: flex-end; }
 
 /* ---------- 9. Outlines ---------- */
-.rv-issues > ul.rv-outline-list, .rv-warnings > ul.rv-outline-list { padding: 0.75em 1em 1em !important; margin: 0 !important; list-style: none !important; }
+.rv-issues > ul.rv-outline-list.rv-outline-list, .rv-warnings > ul.rv-outline-list.rv-outline-list { padding: 0.75em 1em 1em; margin: 0; list-style: none; }
 .rv-outline-list > li { margin-bottom: 1.25em; }
 .rv-outline-list > li:last-child { margin-bottom: 0; }
 .rv-outline-path { font-weight: 600; color: var(--text-normal); font-family: var(--font-monospace, monospace); word-break: break-all; margin-bottom: 0.5em; display: block; }
-.rv-outline-sublist { margin: 0; padding-left: 1em !important; border-left: 2px solid var(--interactive-accent); list-style: none !important; }
+.rv-outline-sublist.rv-outline-sublist { margin: 0; padding-left: 1em; border-left: 2px solid var(--interactive-accent); list-style: none; }
 .rv-outline-sublist > li { margin-bottom: 0.75em; }
 .rv-outline-sublist > li:last-child { margin-bottom: 0; }
 .rv-outline-header { font-family: var(--font-monospace, monospace); font-size: 0.75em; font-weight: 700; color: var(--text-muted); margin-bottom: 0.375em; text-transform: uppercase; letter-spacing: 0.04em; }
-.rv-outline-messages { margin: 0; padding-left: 1.25em !important; list-style: disc !important; font-size: 0.8125em; color: var(--text-muted); }
+.rv-outline-messages.rv-outline-messages { margin: 0; padding-left: 1.25em; list-style: disc; font-size: 0.8125em; color: var(--text-muted); }
 .rv-outline-message { margin-bottom: 0.25em; line-height: 1.5; }
 
 /* Alert outlines: clickable note paths and the per-section copy button. */
@@ -930,7 +936,7 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
     .rv-history-list { max-height: none; }
     .rv-history-detail { overflow: hidden; padding: 0.75em 0 0; border-top: var(--rv-bw) solid var(--background-modifier-border); border-left: 0; }
     
-    .rv-config-text, .rv-config-number, .rv-config-timer-input, .rv-config-timer-warn, .rv-editor-input, .rv-editor textarea, .rv-import-json, .rv-history-search, .rv-history-date, .rv-import-mode-row select { font-size: 1em !important; }
+    .rv-config-text.rv-config-text, .rv-config-number.rv-config-number, .rv-config-timer-input.rv-config-timer-input, .rv-config-timer-warn.rv-config-timer-warn, .rv-editor-input.rv-editor-input, .rv-editor.rv-editor textarea, .rv-import-json.rv-import-json, .rv-history-search.rv-history-search, .rv-history-date.rv-history-date, .rv-import-mode-row.rv-import-mode-row select { font-size: 1em; }
     .rv-root { padding-left: max(1em, env(safe-area-inset-left, 0px)); padding-right: max(1em, env(safe-area-inset-right, 0px)); }
 }
 
@@ -978,7 +984,7 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
     .rv-start-mode .rv-session-config { padding: 1em 0.875em; }
     .rv-start-mode .rv-start-actions { flex-direction: column; }
     .rv-start-mode .rv-start-actions button { min-height: 2.75em; width: 100%; }
-    .modal:has(.rv-manage-modal) { width: 100%; max-width: 100%; }
+    .modal.rv-modal-manage { width: 100%; max-width: 100%; }
     .rv-manage-modal { padding: 0.5em 0.25em; }
     .rv-manage-modal h2 { margin: 0 0 0.5em; font-size: 1.25em; }
     .rv-manage-modal > .setting-item-description { margin: 0 0 0.625em; font-size: 0.75em; line-height: 1.35; }
@@ -1100,8 +1106,8 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
 /* Mobile modals use the same flex geometry as desktop. Obsidian shrinks the
    mobile window when the IME opens, so stretching the modal inside that window
    is enough; no keyboard-height math is added on top. */
-:is(body.is-phone, .is-phone) .modal:has(.rv-manage-modal),
-:is(body.is-phone, .is-phone) .modal:has(.rv-session-detail-modal),
+:is(body.is-phone, .is-phone) .modal.rv-modal-manage,
+:is(body.is-phone, .is-phone) .modal.rv-modal-session-detail,
 :is(body.is-phone, .is-phone) .modal.rv-history-modal,
 :is(body.is-phone, .is-phone) .modal.rv-preset-manager-modal,
 :is(body.is-phone, .is-phone) .modal.rv-update-preset-modal {
@@ -1115,7 +1121,7 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
 
 /* Entry prompts stay compact and centered, flexing only when the window is
    shorter than the prompt itself. */
-:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) {
+:is(body.is-phone, .is-phone) .modal.rv-config-prompt {
     flex: 0 0 auto;
     height: auto;
     min-height: 0;
@@ -1129,16 +1135,16 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
    with an 8em spacer — either one leaves a dead gap when the window has already
    been reduced for the IME. If the prompt is taller than the window, the
    content scrolls and the actions remain reachable at the end of the scroll. */
-:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content {
+:is(body.is-phone, .is-phone) .modal.rv-config-prompt .modal-content {
     position: static;
     flex: 0 1 auto;
     min-height: 0;
     overflow-y: auto;
 }
-:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content > * {
+:is(body.is-phone, .is-phone) .modal.rv-config-prompt .modal-content > * {
     flex: 0 0 auto;
 }
-:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content > .modal-button-container {
+:is(body.is-phone, .is-phone) .modal.rv-config-prompt .modal-content > .modal-button-container {
     position: static;
     inset: auto;
     margin: 0.75em 0 0;
@@ -1188,8 +1194,7 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
 }
 
 /* Our settings sub-pages stretch with the same mobile window/flex geometry. */
-:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-import-host),
-:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-preset-body) {
+:is(body.is-phone, .is-phone) .modal.mod-settings.rv-preset-settings-modal {
     flex: 1 1 auto;
     align-self: stretch;
     height: auto;
@@ -1273,7 +1278,7 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
    buttons). */
 :is(body.is-phone, .is-phone) .modal .modal-content.rv-history-shell,
 :is(body.is-phone, .is-phone) .modal .modal-content.rv-manage-modal,
-:is(body.is-phone, .is-phone) .modal:has(.modal-content > .rv-config-text) .modal-content {
+:is(body.is-phone, .is-phone) .modal.rv-config-prompt .modal-content {
     padding-bottom: 0;
 }
 
@@ -1375,12 +1380,12 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
        leave no room for results. The rows come back as soon as the field loses
        focus, and the body scrolls to reach them. The plugin toggles
        `.is-focused`; focus is user state, not keyboard state. */
-    :is(body.is-phone, .is-phone) .rv-history-filters:has(.rv-history-search.is-focused) {
+    :is(body.is-phone, .is-phone) .rv-history-filters.is-search-focused {
         flex: 0 0 auto;
         padding-bottom: 0.375em;
     }
-    :is(body.is-phone, .is-phone) .rv-history-filters:has(.rv-history-search.is-focused) > .rv-history-filter-row:not(:first-child),
-    :is(body.is-phone, .is-phone) .rv-history-filters:has(.rv-history-search.is-focused) > .rv-history-filter-row:first-child > label {
+    :is(body.is-phone, .is-phone) .rv-history-filters.is-search-focused > .rv-history-filter-row:not(:first-child),
+    :is(body.is-phone, .is-phone) .rv-history-filters.is-search-focused > .rv-history-filter-row:first-child > label {
         display: none;
     }
 
@@ -1407,7 +1412,6 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
    above the footer, and let the body clip cleanly when it is shorter. */
 @container rv-dialog-content (min-height: 481px) {
     :is(body.is-phone, .is-phone) .modal.rv-history-modal .rv-history-workspace {
-        min-height: min(18em, max(7em, calc(100% - 24em)));
         min-height: min(18em, max(7em, calc(100cqh - 24em)));
     }
 }
@@ -1446,16 +1450,14 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
 /* Settings-page preset import/export: fill the page on desktop and mobile, so
    the preview grows and the Apply footer sits at the bottom instead of
    floating in the middle with empty space underneath. */
-.modal.mod-settings .setting-page:has(.rv-import-host),
-.modal.mod-settings .setting-page:has(.rv-preset-body) {
+.modal.mod-settings .setting-page.rv-preset-settings-page {
     display: flex;
     flex-direction: column;
     height: 100%;
     min-height: 0;
 }
 
-.modal.mod-settings .setting-page-content:has(> .rv-import-host),
-.modal.mod-settings .setting-page-content:has(> .rv-preset-body) {
+.modal.mod-settings .setting-page-content.rv-preset-settings-content {
     display: flex;
     flex-direction: column;
     flex: 1 1 auto;
@@ -1476,15 +1478,8 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
 :is(body.is-phone, .is-phone) .rv-manage-tree {
     /* Keep the tree readable instead of collapsing to a few pixels, but let it
        shrink with the dialog on very short screens. */
-    min-height: 8em;
     min-height: min(8em, 30cqh);
-    /* Percentages resolve against the modal-content flex box if container
-       units are unavailable; cqh tracks the dialog's real content box. */
-    max-height: min(
-        55%,
-        28.75em,
-        max(6em, calc(100% - 18em))
-    );
+    /* cqh tracks the dialog's real content box. */
     max-height: min(
         55cqh,
         28.75em,
@@ -1502,14 +1497,13 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
    already shrinks for the IME, so applying the IME height again inside the page
    would push content out of the dialog. Neutralize both for this plugin's
    settings tab. */
-.modal.mod-settings .setting-page.vertical-tab-content:has(.rv-import-host),
-.modal.mod-settings .setting-page.vertical-tab-content:has(.rv-preset-body) {
+.modal.mod-settings .setting-page.vertical-tab-content.rv-preset-settings-page {
     padding-bottom: max(0.5em, env(safe-area-inset-bottom, 0px));
 }
-:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-settings-tab) .setting-page.vertical-tab-content {
+:is(body.is-phone, .is-phone) .modal.mod-settings.rv-settings-modal .setting-page.vertical-tab-content {
     padding-bottom: max(0.5em, env(safe-area-inset-bottom, 0px));
 }
-:is(body.is-phone, .is-phone) .modal.mod-settings:has(.rv-settings-tab) .vertical-tab-header:after {
+:is(body.is-phone, .is-phone) .modal.mod-settings.rv-settings-modal .vertical-tab-header:after {
     height: max(100px, env(safe-area-inset-bottom, 0px));
 }
 
@@ -1528,25 +1522,24 @@ body:not(.is-phone) .rv-update-preset-modal .modal-content { height: 60dvh; min-
 
 /* Date + category: two date fields on one grid row, category underneath. */
 @media (max-width: 700px) {
-    .rv-history-filter-row:has(.rv-history-date) {
+    .rv-history-filter-row-dates {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: center;
-        column-gap: 0.375em;
-        row-gap: 0.25em;
+        gap: 0.25em 0.375em;
     }
-    .rv-history-filter-row:has(.rv-history-date) > label:last-of-type {
+    .rv-history-filter-row-dates > label:last-of-type {
         grid-column: 1 / 2;
         margin-top: 0.25em;
         min-width: 0;
     }
-    .rv-history-filter-row:has(.rv-history-date) > .rv-history-category {
+    .rv-history-filter-row-dates > .rv-history-category {
         grid-column: 2 / -1;
         width: 100%;
         min-width: 0;
         margin-top: 0.25em;
     }
-    .rv-history-filter-row:has(.rv-history-date) > .rv-history-date {
+    .rv-history-filter-row-dates > .rv-history-date {
         width: 100%;
         min-width: 0;
     }

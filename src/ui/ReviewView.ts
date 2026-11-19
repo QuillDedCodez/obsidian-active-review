@@ -1162,6 +1162,7 @@ private openRenameModal(): void {
         options?: { hideView?: boolean },
     ): void {
         const modal = new Modal(this.app);
+        modal.modalEl.addClass('rv-modal-session-detail');
         // Kept live so an in-place action (archive / unarchive) can re-render
         // this panel against the refreshed summary without reopening the modal.
         let current = summary;

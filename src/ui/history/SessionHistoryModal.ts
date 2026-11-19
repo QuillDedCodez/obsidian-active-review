@@ -39,7 +39,7 @@ function categoryNames(
     for (const path of summary.log.frozen_pool) {
         const rel = path.startsWith(prefix) ? path.slice(prefix.length) : path;
         const parts = rel.split('/');
-        if (parts.length > 1 && parts[0]) names.add(parts[0]!);
+        if (parts.length > 1 && parts[0]) names.add(parts[0]);
     }
     return [...names].sort((a, b) => a.localeCompare(b));
 }
@@ -101,11 +101,11 @@ export class SessionHistoryModal extends Modal {
             this.renderList();
         });
         // A focused search collapses the chip/date filter rows on phones so
-        // the results keep room above the IME; see the `is-focused` rules in
-        // styles.css. The class is toggled here because `:has(:focus)` is not
-        // reliable inside Obsidian's nested mobile frames.
-        search.addEventListener('focus', () => search.addClass('is-focused'));
-        search.addEventListener('blur', () => search.removeClass('is-focused'));
+        // the results keep room above the IME; see the `is-search-focused`
+        // rules in styles.css. The class is toggled here because `:has(:focus)`
+        // is not reliable inside Obsidian's nested mobile frames.
+        search.addEventListener('focus', () => filters.addClass('is-search-focused'));
+        search.addEventListener('blur', () => filters.removeClass('is-search-focused'));
 
         const statusRow = filters.createDiv({ cls: 'rv-history-filter-row' });
         statusRow.createEl('label', { text: 'Status' });
@@ -143,7 +143,9 @@ export class SessionHistoryModal extends Modal {
             });
         }
 
-        const dateRow = filters.createDiv({ cls: 'rv-history-filter-row' });
+        const dateRow = filters.createDiv({
+            cls: 'rv-history-filter-row rv-history-filter-row-dates',
+        });
         dateRow.createEl('label', { text: 'Date' });
         const from = dateRow.createEl('input', {
             type: 'date',

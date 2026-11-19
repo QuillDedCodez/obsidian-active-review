@@ -482,8 +482,7 @@ export class QuestionImportPane extends PresetImportPane<ManagePresetManifest, I
 
     private refreshPreviewSummary(preview: ImportPreview): void {
         if (this.countsEl) {
-            const holder = this.previewEl.ownerDocument.createElement('div');
-            const bar = renderImportCounts(holder, this.countItems(preview));
+            const bar = renderImportCounts(this.previewEl, this.countItems(preview));
             this.countsEl.replaceWith(bar);
             this.countsEl = bar;
         }

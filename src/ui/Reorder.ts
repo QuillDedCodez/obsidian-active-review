@@ -113,8 +113,7 @@ function collectCustomProps(item: HTMLElement, win: Window): Record<string, stri
 }
 
 function createGhost(item: HTMLElement, customProps: Record<string, string>): Ghost {
-    const ghostEl = item.ownerDocument.createElement('div');
-    ghostEl.className = 'rv-reorder-ghost';
+    const ghostEl = createDiv({ cls: 'rv-reorder-ghost' });
     const cloneEl = item.cloneNode(true) as HTMLElement;
     cloneEl.removeAttribute('aria-label');
     cloneEl.classList.add('rv-reorder-dragged-item');

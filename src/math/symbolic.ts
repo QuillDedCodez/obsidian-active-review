@@ -351,7 +351,7 @@ class Parser {
     private derivativeSpec(): { variable: string; order: number; after: number } | null {
         const toks = this.toks;
         const p = this.pos;
-        if (!(toks[p]?.t === 'op' && toks[p]!.v === '{')) return null;
+        if (!(toks[p]?.t === 'op' && toks[p].v === '{')) return null;
         if (!(toks[p + 1]?.t === 'id' && toks[p + 1]!.v === 'd')) return null;
 
         let order = 1;
