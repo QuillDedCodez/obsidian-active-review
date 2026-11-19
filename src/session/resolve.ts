@@ -156,7 +156,7 @@ export function resolve(defs: VarDef[], given: Record<string, Value>): Resolved 
                     : (given[d.name] ?? d.values?.[0] ?? '');
             src = val;
         } else if (d.valueType === 'string' && d.kind !== 'stringPick') {
-            val = (given[d.name] ?? d.values?.[0] ?? '') as string;
+            val = given[d.name] ?? d.values?.[0] ?? '';
             src = val;
         } else if (d.kind === 'exprPick') {
             const idx = given[d.name] as number;
@@ -169,7 +169,7 @@ export function resolve(defs: VarDef[], given: Record<string, Value>): Resolved 
         } else if (d.name in given) {
             val = given[d.name] ?? d.first;
             if (d.kind === 'stringPick') {
-                const idx = (d.values ?? []).indexOf(val as string);
+                const idx = (d.values ?? []).indexOf(val);
                 src = idx >= 0 ? (d.valueSources?.[idx] ?? val) : val;
             } else {
                 src = val;

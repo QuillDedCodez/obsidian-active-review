@@ -76,7 +76,7 @@ export class AdaptiveTaskQueue<K extends string | number = number> {
                     return window.requestAnimationFrame(callback);
                 }
                 if (typeof window !== 'undefined') {
-                    return window.setTimeout(callback, 16) as unknown as number;
+                    return window.setTimeout(callback, 16);
                 }
                 return 0;
             });

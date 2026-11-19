@@ -535,7 +535,7 @@ function parseInlineArray<T>(raw: string, convert: (s: string) => T): T[] {
     if (!raw.startsWith('[') || !raw.endsWith(']')) return [];
     const inner = raw.slice(1, -1).trim();
     if (inner === '') return [];
-    return inner.split(',').map((s) => convert(s.trim())).filter((v) => v !== undefined) as T[];
+    return inner.split(',').map((s) => convert(s.trim()));
 }
 
 /**

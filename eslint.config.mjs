@@ -43,28 +43,6 @@ export default [
             // Sentence case is reviewed separately in R7; the existing UI copy
             // predates this rule and changing it is not a refactor.
             'obsidianmd/ui/sentence-case': 'off',
-            // Non-null assertions document proven invariants (array bounds after
-            // length checks, map lookups after seeding). `tsc --strict` already
-            // rejects genuinely unsafe access; the stylistic rule adds churn.
-            '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-        },
-    },
-    {
-        files: ['src/settings/SettingsTab.ts'],
-        rules: {
-            // The plugin targets Obsidian 1.7.2+, so the legacy `display()` tab
-            // API and the deprecated notice on it are intentional until the
-            // minimum app version moves to 1.13.
-            'obsidianmd/settings-tab/prefer-setting-definitions': 'off',
-            '@typescript-eslint/no-deprecated': 'off',
-        },
-    },
-    {
-        files: ['src/ui/ImportModalParts.ts'],
-        rules: {
-            // The preview layout distributes measured pixel heights across open
-            // sections at runtime; no static class can express those values.
-            'obsidianmd/no-static-styles-assignment': 'off',
         },
     },
 ];

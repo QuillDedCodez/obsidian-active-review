@@ -549,9 +549,14 @@ export class ReviewView extends ItemView {
         const shared = this.plugin.getSessionHub().get(summary.file.path);
         const attachedElsewhere =
             shared !== null && shared.hasOtherViewers(this.viewID);
+        // Only a session that is still pending is actively writing. A
+        // completed session can stay attached to the quiz screen while its
+        // completion panel is open, so its actions must remain available.
+        const running =
+            shared !== null && shared.runtime.log.status === 'pending';
         if (
             action !== 'resume' &&
-            shared !== null &&
+            running &&
             // The one exception: archiving a session that another tab is
             // running asks for confirmation instead of being refused.
             !(action === 'archive' && attachedElsewhere)
@@ -635,7 +640,11 @@ export class ReviewView extends ItemView {
      */
     private async applyArchive(summary: SessionSummary): Promise<SessionSummary[]> {
         const shared = this.plugin.getSessionHub().get(summary.file.path);
-        if (shared) {
+        // A completed session is no longer writing, so its attached runtime
+        // must keep its completed state; only a pending run is frozen here.
+        const running =
+            shared !== null && shared.runtime.log.status === 'pending';
+        if (shared && running) {
             // archiveSession() maps pending → abandoned and records the old
             // status; mirror that in memory so writes stop immediately.
             shared.runtime.log.status = 'abandoned';
@@ -646,7 +655,7 @@ export class ReviewView extends ItemView {
             await this.plugin.refreshSessionEntry(summary.file);
             await this.renderStart();
         } catch (e) {
-            if (shared) {
+            if (shared && running) {
                 shared.runtime.log.status = 'pending';
                 shared.runtime.log.archived_from = null;
             }

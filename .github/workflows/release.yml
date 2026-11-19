@@ -1,50 +1,83 @@
-name: Release Obsidian plugin
+name: Release
 
+# Builds the plugin from the tagged source, attests the release assets, and
+# replaces the release's assets with those exact bytes. Run this from the
+# published release (or dispatch it for an existing tag) so the download and
+# the provenance attestation always describe the same build.
 on:
-    push:
-        tags:
-            - '*'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to rebuild (must equal manifest.json version)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+concurrency:
+  group: release-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-            id-token: write
-            attestations: write
-        steps:
-            - uses: actions/checkout@v6
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "No release tag supplied." >&2
+            exit 1
+          fi
+          echo "name=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
 
-            - name: Use Node.js
-              uses: actions/setup-node@v6
-              with:
-                  node-version: 24
-                  cache: 'npm'
+      - name: Check out the release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.name }}
+          fetch-depth: 0
 
-            - name: Build plugin
-              run: |
-                  npm ci
-                  npm run build
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
 
-            - name: Check for optional styles
-              id: styles
-              run: |
-                  [ -f styles.css ] && echo "exists=true" >> "$GITHUB_OUTPUT" || echo "exists=false" >> "$GITHUB_OUTPUT"
+      - name: Install from the lockfile
+        run: npm ci
 
-            - name: Attest build provenance
-              uses: actions/attest@v4
-              with:
-                  subject-path: |
-                      main.js
-                      ${{ steps.styles.outputs.exists == 'true' && 'styles.css' || '' }}
+      - name: Verify and build
+        run: npm run build -- --no-sync
 
-            - name: Create release
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                  tag="${GITHUB_REF#refs/tags/}"
+      - name: Check that the tag matches the manifest
+        env:
+          TAG: ${{ steps.tag.outputs.name }}
+        run: |
+          VERSION="$(node -p "require('./manifest.json').version")"
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "Tag $TAG does not match manifest.json version $VERSION." >&2
+            exit 1
+          fi
 
-                  gh release create "$tag" \
-                    --title="$tag" \
-                    --draft \
-                    main.js manifest.json ${{ steps.styles.outputs.exists == 'true' && 'styles.css' || '' }}
+      - name: Attest release assets
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
+
+      - name: Upload attested assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.tag.outputs.name }}
+        run: |
+          gh release upload "$TAG" main.js manifest.json styles.css --clobber
+          gh release edit "$TAG" --title "Active Review $TAG"

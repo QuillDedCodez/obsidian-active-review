@@ -185,6 +185,9 @@ export function renderQuizScreen(props: QuizScreenProps): QuizScreenHandle {
     let cardHost: HTMLElement | null = null;
     let submitAllBtn: HTMLButtonElement | null = null;
     let navigatorEl: HTMLElement | null = null;
+    // Own the visible state so repeated clicks work without a full re-render;
+    // `props.navigatorShown` only carries the last value across renders.
+    let navigatorVisible = props.navigatorShown;
     let renderingPaused = false;
     const flagged = new Set<number>(props.initialFlags);
     const slotEls: HTMLElement[] = [];
@@ -566,17 +569,17 @@ export function renderQuizScreen(props: QuizScreenProps): QuizScreenHandle {
                 cls: 'rv-nav-toggle',
                 attr: {
                     type: 'button',
-                    'aria-pressed': String(props.navigatorShown),
+                    'aria-pressed': String(navigatorVisible),
                 },
             });
-            toggle.toggleClass('is-active', props.navigatorShown);
+            toggle.toggleClass('is-active', navigatorVisible);
             toggle.addEventListener('click', () => {
-                const next = !props.navigatorShown;
-                toggle.toggleClass('is-active', next);
-                toggle.setAttr('aria-pressed', String(next));
-                navigatorEl?.toggleClass('rv-hidden', !next);
-                layout.toggleClass('has-navigator', next);
-                props.onNavigatorToggle(next);
+                navigatorVisible = !navigatorVisible;
+                toggle.toggleClass('is-active', navigatorVisible);
+                toggle.setAttr('aria-pressed', String(navigatorVisible));
+                navigatorEl?.toggleClass('rv-hidden', !navigatorVisible);
+                layout.toggleClass('has-navigator', navigatorVisible);
+                props.onNavigatorToggle(navigatorVisible);
             });
         }
 
