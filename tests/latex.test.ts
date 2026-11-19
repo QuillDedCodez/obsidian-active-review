@@ -127,6 +127,15 @@ test('evaluation: factorial rejects non-integers with a readable message', () =>
     assert.throws(() => evaluate('(-1)!', {}), /Factorial needs a non-negative integer/);
 });
 
+test('evaluation: power chains are right-associative; groups override', () => {
+    assert.equal(evaluate('2^2^2^2', {}), 65536);
+    assert.equal(evaluate('2^{2}^{2}^{2}', {}), 65536);
+    assert.equal(evaluate('((2^2)^2)^2', {}), 256);
+    assert.equal(evaluate('(2^2)^2^2', {}), 256);
+    assert.equal(evaluate('-2^2', {}), -4);
+    assert.equal(evaluate('(-2)^2', {}), 4);
+});
+
 test('evaluation: \\sum and \\prod iterate', () => {
     assert.equal(evaluate('\\sum_{i=1}^{5} i', {}), 15);
     assert.equal(evaluate('\\prod_{i=1}^{4} i', {}), 24);

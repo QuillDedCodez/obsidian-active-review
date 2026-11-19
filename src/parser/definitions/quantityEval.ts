@@ -198,19 +198,19 @@ class TypedParser {
     }
 
     private parseMultiplicative(): Value {
-        let value = this.parsePower();
+        let value = this.parseUnary();
         for (;;) {
             this.skip();
             const op = this.peek();
             if (op === '*' || op === '/') {
                 this.i++;
-                const right = this.parsePower();
+                const right = this.parseUnary();
                 value = op === '*' ? multiplyValues(value, right) : divideValues(value, right);
                 continue;
             }
             // Implicit multiplication: 2a, a(b), 2(3).
             if (op !== undefined && /[A-Za-z0-9(\\]/.test(op)) {
-                const right = this.parsePower();
+                const right = this.parseUnary();
                 value = multiplyValues(value, right);
                 continue;
             }
@@ -220,15 +220,36 @@ class TypedParser {
     }
 
     private parsePower(): Value {
-        let value = this.parseUnary();
+        let value = this.parsePrimary();
         this.skip();
         if (this.peek() === '^') {
             this.i++;
             this.skip();
-            // Match the shared math evaluator: `x^{2}` and `x^(2)` mean the same thing.
-            const exponent = this.peek() === '{' ? this.parseBracedExponent() : this.parseUnary();
-            if (typeof exponent !== 'number') throw new Error('quantity exponent must be a number');
-            value = powerValues(value, exponent);
+            value = powerValues(value, this.parseExponent());
+        }
+        return value;
+    }
+
+    /** Exponents bind right-to-left, matching the shared math evaluator:
+     *  `a^b^c` = `a^(b^c)`, while `(a^b)^c` = `a^(b*c)`. */
+    private parseExponent(): number {
+        this.skip();
+        if (this.peek() === '-') {
+            this.i++;
+            return -this.parseExponent();
+        }
+        if (this.peek() === '+') {
+            this.i++;
+            return this.parseExponent();
+        }
+        // Match the shared evaluator: `x^{2}` and `x^(2)` mean the same thing.
+        const value = this.peek() === '{' ? this.parseBracedExponent() : this.parseUnary();
+        if (typeof value !== 'number') throw new Error('quantity exponent must be a number');
+        this.skip();
+        if (this.peek() === '^') {
+            this.i++;
+            this.skip();
+            return Math.pow(value, this.parseExponent());
         }
         return value;
     }
@@ -263,7 +284,7 @@ class TypedParser {
             this.i++;
             return this.parseUnary();
         }
-        return this.parsePrimary();
+        return this.parsePower();
     }
 
     private parsePrimary(): Value {

@@ -251,6 +251,27 @@ test('quantity arithmetic accepts LaTeX braced exponents', () => {
     assert.equal(fmtQuantityValue(nestedResolved.values.c as QuantityValue), '4 m^2');
 });
 
+test('quantity arithmetic chains powers right-to-left and honours groups', () => {
+    const list = defs([
+        'u = 1; ; "u"',
+        'chain = 2^2^2^2 * u',
+        'braced = 2^{2}^{2}^{2} * u',
+        'grouped = ((2^2)^2)^2 * u',
+        'mixed = (2^2)^2^2 * u',
+        'sign = -2^2 * u',
+        'signGrouped = (-2)^2 * u',
+    ].join('\n'));
+    const resolved = resolve(list, {});
+    const canonical = (name: string): number =>
+        (resolved.values[name] as QuantityValue).canonical;
+    assert.equal(canonical('chain'), 65536);
+    assert.equal(canonical('braced'), 65536);
+    assert.equal(canonical('grouped'), 256);
+    assert.equal(canonical('mixed'), 256);
+    assert.equal(canonical('sign'), -4);
+    assert.equal(canonical('signGrouped'), 4);
+});
+
 test('display uses min-sigfigs while max-sigfigs only caps acceptance', () => {
     const p = policy('m', 3, 5);
     assert.equal(fmtQuantity(1.25678, p), '1.26 m');
