@@ -10,56 +10,37 @@ multi-value, and quantity-aware answers), and writes local session history.
 
 - Plugin ID: `active-review` (never change it after release).
 - Version: `2.0.3`; minimum Obsidian version: `1.13.0`.
+- Stage: **production** — releases `2.0.0`–`2.0.3` and above ship the officially
+  established code structure: the `src/` tree and the compiled `styles.css` are
+  settled and stay intact across releases.
 - Entry point: `src/main.ts` → bundled to `main.js`.
 - Release artifacts: `main.js`, `manifest.json`, `styles.css`.
 - Local-only: no network requests, no telemetry, no remote code.
 
 ## Repository layout
 
+This folder is the standalone, published plugin repository. It can be copied to
+Windows/macOS/Linux and built there on its own.
+
 | Path | Role |
 |---|---|
-| `dev-active-review/` | Canonical development copy. Edit sources, tests, docs tooling, and build config here. |
-| `obsidian-active-review/` | Submission/final copy: the published plugin repository. Maintained as a standalone folder (can be copied to Windows/macOS/Linux and built there). |
-| `dev Plugin Docs/` | Authored documentation source (OpenCode/dev workspace). Synced to the submission copy as `Plugin Docs/` by the dev build. |
-| `Final Adjusted Submission Ready/` | Windows reference snapshot only; not a build target. |
+| `src/` | Production TypeScript sources — the officially established structure. |
+| `tests/` | TypeScript test harness and pure-module suites. |
+| `scripts/build-submission.mjs` | Standalone verified build (the only build script). |
+| `Plugin Docs/` | Released plugin documentation. |
+| `.github/workflows/` | Release workflow. |
+| `main.js`, `manifest.json`, `styles.css` | Release artifacts (`main.js` is generated — rebuild it, never hand-edit it). |
+| `AGENTS.md` | This guide; maintained directly in this folder. |
 
 Rules:
 
-- Treat `dev-active-review/` as the source of truth for `src/`, `tests/`,
-  `styles.css`, and build configuration.
 - Do not hand-edit generated `main.js`. Rebuild it instead.
-- The submission copy ships the same `src/`, `tests/`, and build configuration as
-  dev, plus generated artifacts (`main.js`) and release metadata.
 - Remove Windows `*:Zone.Identifier` files before committing; they are metadata,
   not project files.
 
-## Build workflows
+## Build workflow
 
-### Dev/OpenCode workflow (syncs the submission folder)
-
-Run from the workspace:
-
-```bash
-cd dev-active-review && npm run build && cd ..
-```
-
-`scripts/build.mjs` is cross-platform (Windows, macOS, Linux):
-
-1. Checks Node 18+/npm and `package-lock.json`; installs from the lockfile if
-   needed (`npm ci --ignore-scripts`, or with `--clean`).
-2. Audits production dependencies.
-3. Runs `npm run verify` (type-check, lint, and tests).
-4. Bundles production `main.js` and checks artifacts.
-5. Syncs `src/`, `tests/`, config, generated artifacts, and `dev Plugin Docs/`
-   (as `Plugin Docs/`) into `../obsidian-active-review/`.
-
-Options: `--clean`, `--no-sync`, `--no-docs`. Set `OUT_DIR` / `DOCS_OUT` /
-`DEV_DOCS` to override paths. Docs sync and folder copying are dev/OpenCode-only
-steps.
-
-### Submission/final workflow (standalone, no copying)
-
-Inside `obsidian-active-review/`:
+Inside this folder:
 
 ```bash
 npm ci            # once, if needed
@@ -83,10 +64,10 @@ The folder can be copied to another machine and built independently.
 | Command | Action |
 |---|---|
 | `npm run dev` | esbuild watch mode with inline source maps. |
-| `npm run build` | Dev: full verified build + sync. Submission: standalone verified build (no sync/docs). |
+| `npm run build` | Standalone verified build: verify + bundle + artifact checks. |
 | `npm run build:bundle` | Production bundle only. |
 | `npm run verify` | Type-check, lint, and run the full test suite. |
-| `npm run typecheck` | `tsc --noEmit` only. |
+| `npm run typecheck` | `tsc -noEmit -skipLibCheck` only. |
 | `npm run lint` | ESLint over `src/`. |
 | `npm test` | Compile `src/` + `tests/` and run the harness (cross-platform). |
 
@@ -116,11 +97,16 @@ When strict checks fail:
 
 - Add an explicit bounds/existence guard before indexed access.
 - Use a non-null assertion (`!`) only for an invariant the code just proved.
-- Widen a parameter’s type when a runtime guard legitimately receives
+- Widen a parameter's type when a runtime guard legitimately receives
   `undefined`; do not silence the error with `any`.
 - Prefer small typed helpers over casts. Avoid `@ts-ignore`.
 
 ## Source layout
+
+The `src/` tree and `styles.css` reflect the officially established production
+structure (settled from `2.0.0`–`2.0.3` onward). Keep them intact and coherent:
+prefer edits inside existing files, and add a new `src/` file only when a
+feature genuinely needs one (see Versioning and release).
 
 | Path | Responsibility |
 |---|---|
@@ -169,19 +155,54 @@ owning module and split files that grow beyond a single responsibility.
 
 ## Versioning and release
 
+### Production stage
+
+Releases `2.0.0`–`2.0.3` and above are production-stage. The `src/` tree and
+the compiled `styles.css` are the officially established code structure:
+keep them intact and coherent from one release to the next.
+
+### Version scheme
+
+| Tag | Tier | Typical changes |
+|---|---|---|
+| `2.0.x` (e.g. `2.0.4`, `2.0.10`, `2.0.99`) | Minor maintenance — frequent | A few line changes in the same file, merging a few `.ts` files into one, hotfixes, minor bug fixes. The patch may take multiple digits (`2.0.1x`, `2.0.xx`, `2.0.xxx`) — it only marks maintenance within the same minor. |
+| `2.x.0` (e.g. `2.1.0`, `2.2.0`) | Slight-major — frequent | A few new incremental features and/or feature improvements in one release. Ideally no new `src/` file; add a small number of new files only when the feature truly needs them. |
+| `x.0.0` (e.g. `3.0.0`) | Major — rare | Many features in one update. Use only when the change is clearly major; when in doubt, prefer `2.x.0`. |
+
+`2.0.x` and `2.x.0` are both expected to be used often: the goal is continuous
+fixes and improvement while keeping the production `src/` tree intact and
+coherent. `x.0.0` is reserved for rare, genuinely major updates.
+
+### Choose the release tag with the developer
+
+Version tags are still somewhat arbitrary — **never pick or bump one on your
+own**. Before a release, ask the main developer:
+
+1. Ask whether the version **proceeds to the next** tag or **keeps the
+   current** version.
+2. If it proceeds, ask whether it is `2.0.x` (maintenance) or `2.x.0`
+   (slight-major). You may recommend the tag you suggest, but do not push it —
+   the developer decides.
+3. Only in rare cases may you ask whether the developer wants an `x.0.0` major
+   bump.
+
+### Synchronized values
+
 Keep these three values synchronized:
 
 1. `manifest.json` → `version` and `description` (user-facing).
 2. `package.json` → `version` and `description`.
 3. `versions.json` → `{ "<version>": "<minAppVersion>" }`.
 
-Release checklist:
+### Release checklist
 
+- Agree the release tag with the developer (see above), then bump it in all
+  three files.
 - Run `npm run verify`, then a production build.
 - Confirm `main.js` has no source map, no absolute local paths, and no CRLF.
 - Confirm `styles.css` is present and current.
-- Commit the submission folder, then create a GitHub release whose tag exactly
-  matches `manifest.json`’s version (no leading `v`).
+- Commit, then create a GitHub release whose tag exactly matches
+  `manifest.json`'s version (no leading `v`).
 - Let the release workflow build and upload `main.js`, `manifest.json`, and
   `styles.css` from the tagged source. Do not build or upload the assets by
   hand: the workflow replaces them with its reproducible build and attests
@@ -206,19 +227,19 @@ Release checklist:
   settings.
 - Avoid deceptive patterns and spammy notices.
 
-## Agent do / don’t
+## Agent do / don't
 
 **Do**
 
 - Read the existing module and surrounding patterns before changing behavior.
-- Keep edits surgical and consistent with the file’s existing style.
+- Keep edits surgical and consistent with the file's existing style.
 - Run `npm run verify` and a production build before declaring completion.
 - Preserve local-only operation and established command/settings IDs.
 
-**Don’t**
+**Don't**
 
-- Don’t weaken `tsconfig.json`, ESLint rules, or artifact checks to pass a build.
-- Don’t commit `node_modules/`, `cache/`, `tests/.build/`, or `data.json`.
-- Don’t introduce cloud services, analytics, or telemetry without explicit
+- Don't weaken `tsconfig.json`, ESLint rules, or artifact checks to pass a build.
+- Don't commit `node_modules/`, `cache/`, `tests/.build/`, or `data.json`.
+- Don't introduce cloud services, analytics, or telemetry without explicit
   opt-in and documentation.
-- Don’t rewrite or reformat unrelated files.
+- Don't rewrite or reformat unrelated files.
