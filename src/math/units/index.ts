@@ -58,6 +58,7 @@ export {
     groupIntegerDigits,
     plainUnitText,
     precisionStep,
+    quantityTolerance,
     resolveDisplay,
     resolveLayout,
     roundSig,
@@ -67,6 +68,7 @@ export {
     unitSuffix,
     type DisplayLayout,
     type DisplayUnit,
+    type QuantityTolerance,
 } from './format';
 export { resolveAnswer, resolveSlotAnswer, resolveSlotPolicy } from './resolveAnswer';
 export {

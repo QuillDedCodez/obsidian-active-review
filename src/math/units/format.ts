@@ -345,6 +345,62 @@ export function resolveLayout(canonical: number, policy: AnswerSlotSpec): Displa
     return { display, exponent, mantissa };
 }
 
+/** One last-displayed-digit step in the answer's normalized representation. */
+export interface QuantityTolerance {
+    /** Answer value in display units, e.g. `10.234` for `10.234 µA`. */
+    shown: number;
+    /** One step in display units, e.g. `0.001` µA. */
+    step: number;
+    /** The same step converted back to canonical units. */
+    canonicalStep: number;
+    displayScale: number;
+    exponent: number;
+}
+
+/**
+ * Magnitude absolute tolerance: normalize the answer to its display prefix /
+ * scientific representation at the answer's precision, then take one unit of
+ * the last displayed digit. This scales with the magnitude and is invariant to
+ * equivalent prefixes and scientific notation.
+ */
+export function quantityTolerance(
+    canonical: number,
+    policy: AnswerSlotSpec,
+): QuantityTolerance {
+    const precision = policy.precision ?? { kind: 'sigfigs' as const, min: 3, max: 15 };
+    if (canonical === 0) {
+        return {
+            shown: 0,
+            step: 0,
+            canonicalStep: 0,
+            displayScale: 1,
+            exponent: 0,
+        };
+    }
+    if (policy.components !== undefined && policy.components.length > 0) {
+        const decimals = precision.kind === 'decimals' ? precision.min : 0;
+        const step = compoundStep(policy, decimals);
+        return {
+            shown: canonical,
+            step,
+            canonicalStep: step,
+            displayScale: 1,
+            exponent: 0,
+        };
+    }
+    const layout = resolveLayout(canonical, policy);
+    const shown = displayValue(canonical, policy);
+    const step = precisionStep(shown, precision, 0, layout.exponent);
+    const displayScale = layout.display.scale;
+    return {
+        shown,
+        step,
+        canonicalStep: step * displayScale,
+        displayScale,
+        exponent: layout.exponent,
+    };
+}
+
 /** The value as it is written in the display unit (affine-aware). */
 export function displayValue(canonical: number, policy: AnswerSlotSpec): number {
     if (policy.components !== undefined && policy.components.length > 0) return canonical;

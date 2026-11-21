@@ -6,7 +6,6 @@
  * answer's own policy, so a wrong choice never shows a different unit system or
  * prefix convention from the correct one.
  */
-import { TOLERANCE } from '../../constants';
 import { SECTIONS } from '../../parser';
 import { conditionDistractors, fillConditionedDistractor } from './condition';
 import { describe, resolve, type Resolved } from '../resolve';
@@ -19,6 +18,7 @@ import {
     fmtQuantity,
     parseQuantityInput,
     precisionStep,
+    quantityTolerance,
     resolveAnswer,
     resolveLayout,
     roundSig,
@@ -104,11 +104,18 @@ export function buildQuantityDistractors(
     const correctKey = displayKey(answer.canonical, policy);
     const takenKeys = new Set<string>([correctKey]);
     const takenValues: number[] = [answer.canonical];
+    const tolerance = quantityTolerance(answer.canonical, policy);
 
     const push = (candidate: QuantityDistractor): void => {
         if (found.length >= needed) return;
         if (candidate.canonical !== undefined) {
-            if (takenValues.some((t) => Math.abs(t - candidate.canonical!) <= TOLERANCE)) return;
+            if (
+                takenValues.some(
+                    (t) => Math.abs(t - candidate.canonical!) <= tolerance.canonicalStep,
+                )
+            ) {
+                return;
+            }
             const key = displayKey(candidate.canonical, policy);
             if (takenKeys.has(key)) return;
             takenKeys.add(key);

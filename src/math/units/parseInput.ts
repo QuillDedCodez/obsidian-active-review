@@ -9,7 +9,15 @@ import {
     unitKey,
     UnitError,
 } from './parseUnit';
-import { compoundStep, digitsFor, resolveDisplay, resolveLayout, roundSig, truncateSig } from './format';
+import {
+    compoundStep,
+    digitsFor,
+    quantityTolerance,
+    resolveDisplay,
+    resolveLayout,
+    roundSig,
+    truncateSig,
+} from './format';
 import {
     codesForLabel,
     CURRENCY_LABELS,
@@ -390,7 +398,16 @@ export function gradeQuantity(
             // even if its numeric value matches.
             const typedSf = countSignificantFigures(parsed.magnitudeText);
             if (Number.isFinite(band.max) && typedSf > band.max) return false;
+        }
+
+        // Magnitude absolute tolerance: one last-displayed-digit step in the
+        // answer's normalized prefix / scientific representation.
+        const magnitude = quantityTolerance(expected, policy);
+        if (Math.abs(inputCanonical - expected) <= magnitude.canonicalStep) return true;
+
+        if (band.kind === 'sigfigs') {
             if (expectedShown === 0) return Math.abs(typedShown) <= 1e-12;
+            const typedSf = countSignificantFigures(parsed.magnitudeText);
 
             const upper = Number.isFinite(band.max)
                 ? band.max
@@ -422,9 +439,10 @@ export function gradeQuantity(
         return false;
     }
 
+    const magnitude = quantityTolerance(expected, policy).canonicalStep;
     return (
         Math.abs(inputCanonical - expected) <=
-        Math.max(policy.tol, policy.relTol * Math.abs(expected))
+        Math.max(policy.tol, policy.relTol * Math.abs(expected), magnitude)
     );
 }
 

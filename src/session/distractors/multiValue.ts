@@ -8,7 +8,6 @@
  *
  * Candidates are deduplicated by rendered text and by canonical vector.
  */
-import { TOLERANCE } from '../../constants';
 import { SECTIONS, type FormattedValue, type Question, type VarDef, type Warning } from '../../parser';
 import { conditionDistractors, fillConditionedDistractor } from './condition';
 import {
@@ -16,6 +15,7 @@ import {
     displayValue,
     fmtQuantity,
     precisionStep,
+    quantityTolerance,
     resolveLayout,
     resolveSlotAnswer,
     roundSig,
@@ -114,8 +114,11 @@ export function gridCandidates(slot: ResolvedSlot): number[] {
     return raw.filter((value) => Number.isFinite(value)).map((value) => value * scale + offset);
 }
 
-function vectorDiffers(a: number[], b: number[]): boolean {
-    return a.some((value, index) => Math.abs(value - (b[index] ?? 0)) > TOLERANCE);
+function vectorDiffers(a: number[], b: number[], tolerances: number[]): boolean {
+    return a.some(
+        (value, index) =>
+            Math.abs(value - (b[index] ?? 0)) > (tolerances[index] ?? 0),
+    );
 }
 
 export function buildMultiValueDistractors(
@@ -134,6 +137,9 @@ export function buildMultiValueDistractors(
     warnings.push(...conditioned.warnings);
     const found: MultiValueDistractor[] = [];
     const correctVector = slots.map((slot) => slot.canonical);
+    const tolerances = slots.map(
+        (slot) => quantityTolerance(slot.canonical, slot.policy).canonicalStep,
+    );
     const takenTexts = new Set<string>([renderVariantWith(variant, answerTexts)]);
     const takenVectors: number[][] = [correctVector];
 
@@ -147,7 +153,9 @@ export function buildMultiValueDistractors(
             return;
         }
         if (!candidate.texts || !candidate.vector) return;
-        if (takenVectors.some((vector) => !vectorDiffers(vector, candidate.vector!))) return;
+        if (takenVectors.some((vector) => !vectorDiffers(vector, candidate.vector!, tolerances))) {
+            return;
+        }
         const text = renderVariantWith(variant, candidate.texts);
         if (takenTexts.has(text)) return;
         takenTexts.add(text);
@@ -223,7 +231,7 @@ export function buildMultiValueDistractors(
                 const next = slotsFor({ ...given, [def.name]: value });
                 if (!next) continue;
                 const vector = next.map((slot) => slot.canonical);
-                if (!vectorDiffers(vector, correctVector)) continue;
+                if (!vectorDiffers(vector, correctVector, tolerances)) continue;
                 const texts: Record<string, FormattedValue> = {};
                 next.forEach((slot) => (texts[slot.valueName] = slotText(slot.canonical, slot)));
                 push({
