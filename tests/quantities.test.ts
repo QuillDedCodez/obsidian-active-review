@@ -2,6 +2,7 @@ import { test, assert } from './harness';
 import { fillPlaceholders, parseQuestionNote, parseVars, type VarDef } from '../src/parser';
 import { buildNumericQuestion } from '../src/session/build/numeric';
 import { buildQuantityQuestion } from '../src/session/build/quantity';
+import { buildQuestion } from '../src/session/build';
 import { conditionDistractors, fillConditionedDistractor } from '../src/session/distractors/condition';
 import { resolve } from '../src/session/resolve';
 import {
@@ -9,11 +10,13 @@ import {
     fmtQuantityValue,
     gradeQuantity,
     parseUnitExpr,
+    quantityTolerance,
     unitAccepted,
     unitKey,
     type AnswerSlotSpec,
     type QuantityValue,
 } from '../src/math/units';
+import { buildMaxIndexSample, inRange, randAt } from '../src/session/draws';
 
 function defs(block: string): VarDef[] {
     const env: Record<string, number> = {};
@@ -89,7 +92,9 @@ test('sigfig grading accepts rounded and trimmed values', () => {
     assert.equal(gradeQuantity(answer, '1.23 m'), true);
     assert.equal(gradeQuantity(answer, '1.235 m'), true);
     assert.equal(gradeQuantity(answer, '1.2346 m'), true);
-    assert.equal(gradeQuantity(answer, '1.24 m'), false);
+    // One last-displayed-digit step at 3 sigfigs is 0.01, so 1.24 is inside
+    // the magnitude tolerance around 1.23456.
+    assert.equal(gradeQuantity(answer, '1.24 m'), true);
     assert.equal(gradeQuantity(answer, '1.2 m'), false);
 });
 
@@ -110,6 +115,81 @@ test('explicit maximum bound clamps accepted precision', () => {
     }
     assert.equal(gradeQuantity(answer, '1.25678 m'), false);
     assert.equal(gradeQuantity(answer, '1.2 m'), false);
+});
+
+test('magnitude tolerance follows the normalized prefix and precision', () => {
+    const five = quantityTolerance(1.0234e-5, policy('A', 5, 5));
+    assert.equal(Number(five.shown.toFixed(3)), 10.234);
+    assert.equal(five.step, 0.001);
+    assert.equal(five.canonicalStep, 1e-9);
+
+    const three = quantityTolerance(1.0234e-5, policy('A', 3, 15));
+    assert.equal(Number(three.shown.toFixed(1)), 10.2);
+    assert.equal(three.step, 0.1);
+    assert.equal(three.canonicalStep, 1e-7);
+});
+
+test('magnitude tolerance accepts equivalent prefixes and scientific notation', () => {
+    const p = policy('A', 5, 5);
+    const answer = { canonical: 1.0234e-5, displayScale: 1e-6, policy: p };
+    for (const text of ['10.234 µA', '10.234e-6 A', '1.0234e-5 A']) {
+        assert.equal(gradeQuantity(answer, text), true, text);
+    }
+    assert.equal(gradeQuantity(answer, '10.235 µA'), true);
+    assert.equal(gradeQuantity(answer, '10.24 µA'), false);
+});
+
+test('small-current quantity distractors keep pick-family values', () => {
+    const note = [
+        '## DEFINITIONS',
+        '',
+        '```rv-def',
+        'I = pick(1e-5, 1.1e-5, 1.2e-5, 1.3e-5) ; ; "A"',
+        '```',
+        '',
+        '## QUESTIONS',
+        '',
+        'Current is <<rv:value:I>>.',
+        '',
+        '## ANSWERS',
+        '',
+        '```rv-answer',
+        'I:',
+        'min-sigfigs = 5',
+        'max-sigfigs = 5',
+        'unit-optional = false',
+        '```',
+        '',
+        '<<rv:value:I>>',
+        '',
+    ].join('\n');
+    const q = parseQuestionNote('review/rv-small-current.md', note, 'review');
+    assert.ok(q);
+    const rng = (): number => 0.2;
+    const sq = buildQuantityQuestion(q, rng, rng, rng, 0, 3);
+    assert.ok(sq.choices.length >= 4, String(sq.choices.length));
+    assert.equal(
+        (sq.buildWarnings ?? []).some((warning) =>
+            /no usable quantity distractors|no pick-family/i.test(warning.message),
+        ),
+        false,
+    );
+    const values = sq.choices.map((choice) => Number.parseFloat(choice.text));
+    assert.equal(new Set(values).size, values.length);
+});
+
+test('decreasing rand ranges are accepted and stay inside their endpoints', () => {
+    const list = defs('a = rand(20, 1, 1)');
+    const a = list[0];
+    assert.ok(a && a.kind === 'rand');
+    assert.equal(a.first, 20);
+    assert.equal(a.last, 1);
+    const values = inRange(a, () => 0);
+    assert.equal(values.length, 20);
+    assert.equal(values[0], 20);
+    assert.equal(values[19], 1);
+    assert.equal(randAt(a, 5), 15);
+    assert.equal(buildMaxIndexSample(20, 1, 1, 5).count, 5);
 });
 
 test('unit-optional false rejects a bare number', () => {
@@ -150,6 +230,36 @@ test('fixed answer falls back to author distractors in MCQ', () => {
     assert.ok(sq.choices.length >= 2);
     assert.ok(sq.choices.some((choice) => choice.correct));
     assert.ok(sq.choices.some((choice) => !choice.correct));
+});
+
+test('numeric rand distractors stay inside the declared nonnegative range', () => {
+    const note = [
+        '## DEFINITIONS',
+        '',
+        '```rv-def',
+        'x = rand(1, 5, 1)',
+        'ans = x',
+        '```',
+        '',
+        '## QUESTIONS',
+        '',
+        'What is ans?',
+        '',
+        '## ANSWERS',
+        '',
+        '<<rv:val:ans>>',
+        '',
+    ].join('\n');
+    const q = parseQuestionNote('review/rv-rand-domain.md', note, 'review');
+    assert.ok(q);
+    const rng = (): number => 0.42;
+    const sq = buildNumericQuestion(q, rng, rng, 0);
+    for (const choice of sq.choices) {
+        const value = Number(choice.text);
+        assert.ok(Number.isFinite(value), choice.text);
+        assert.ok(value >= 0, choice.text);
+        assert.ok(value <= 5, choice.text);
+    }
 });
 
 test('pick-family dependencies produce MCQ distractors', () => {
@@ -470,6 +580,73 @@ test('a numeric factor times prefixUnit and unit forms a quantity', () => {
     const value = resolvedQuantity(list, 'a');
     assert.equal(value.canonical, 0.001);
     assert.equal(fmtQuantityValue(value), '1 mN');
+});
+
+test('pick() magnitudes in a quantity declaration are drawable', () => {
+    const note = [
+        '## DEFINITIONS',
+        '',
+        '```rv-def',
+        'V = pick(6, 12) ; ; "V"',
+        'R = pick(2, 4) ; ; "Ω"',
+        'I = V / R',
+        '```',
+        '',
+        '## QUESTIONS',
+        '',
+        'A resistor of <<rv:value:R>> has <<rv:value:V>> across it.',
+        '',
+        '## ANSWERS',
+        '',
+        '```rv-answer',
+        'V:',
+        'I:',
+        '```',
+        '',
+        'V = <<rv:value:V>>, I = <<rv:value:I>>',
+        '',
+    ].join('\n');
+    const q = parseQuestionNote('review/rv-quantity-pick.md', note, 'review');
+    assert.ok(q);
+    assert.equal(q.vars.find((def) => def.name === 'V')?.kind, 'exprPick');
+    assert.equal(q.vars.find((def) => def.name === 'V')?.fixed, false);
+    const rng = (): number => 0.99;
+    const sq = buildQuestion(q, rng, rng, rng, 1, 4);
+    // V / Ω reduces to the named base unit A for display.
+    assert.ok(/ A$/.test(sq.correctText), sq.correctText);
+});
+
+test('an explicit unit on a quantity expression is rejected with detail', () => {
+    const note = [
+        '## DEFINITIONS',
+        '',
+        '```rv-def',
+        'V = pick(6, 12) ; ; "V"',
+        'R = pick(2, 4) ; ; "Ω"',
+        'I = V / R ; ; "A"',
+        '```',
+        '',
+        '## QUESTIONS',
+        '',
+        'Find the voltage and the current.',
+        '',
+        '## ANSWERS',
+        '',
+        '```rv-answer',
+        'V:',
+        'I:',
+        '```',
+        '',
+        'V = <<rv:value:V>>, I = <<rv:value:I>>',
+        '',
+    ].join('\n');
+    const q = parseQuestionNote('review/rv-redundant-unit.md', note, 'review');
+    assert.ok(q);
+    const rng = (): number => 0.5;
+    assert.throws(
+        () => buildQuestion(q, rng, rng, rng, 1, 4),
+        /Remove the explicit unit and write I = V \/ R/,
+    );
 });
 
 test('string anchors stringify conditioned targets', () => {

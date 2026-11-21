@@ -323,24 +323,29 @@ numeric environment. Expressions are validated against first values; a later exp
 | Quoted string | `s = "a push or pull"` | `fixed` | string |
 | Unit set | `u = pick(unit("m"), unit("s"))` | `unit` | drawable |
 | Prefix set | `p = pick(prefixUnit("k"), prefixUnit("m"))` | `prefix` | drawable |
-| Quantity declaration | `d = 5 ; ; "m"` | `expr`/`rand` | §9 |
+| Quantity declaration | `d = 5 ; ; "m"` | `expr`/`rand`/`exprPick` | §9 |
 | Quantity pick | `d = pick(1; ; "m", 2; ; "s")` | `quantityPick` | §8.3 |
 
 ### 7.1 `rand` / `random`
 
-`rand(min, max, step)` draws one value per session. `rand(min, max, step, max_index)` produces a reduced sample:
+`rand(first, last, step)` draws one value per session. `rand(first, last, step, max_index)` produces a reduced sample. The endpoints may be written in either direction and may carry any sign combination:
 
 ```text
-n  = floor((last − first) / step + 1e-9) + 1
+low  = min(first, last)
+high = max(first, last)
+dir  = last < first ? -1 : 1
+n  = floor((high − low) / step + 1e-9) + 1
 kk = min(max_index, n)
 if kk == n: gap = 1, max_offset = 0
 if kk == 1: gap = 0, max_offset = n − 1
 else:       gap = floor((n − 1) / (kk − 1)),
             max_offset = (n − 1) − (kk − 1) * gap
-value = first + step * (offset + index * gap)
+value = first + dir * step * (offset + index * gap)
 ```
 
-- `step > 0`; `max >= min`; `max_index` a positive integer.
+- `step > 0`; `first` and `last` may be any finite numbers; `max_index` a positive integer.
+- `rand(20, 1, 1)`, `rand(-5, 5, 1)`, `rand(5, -5, 1)`, and `rand(-1, -10, 1)` are all valid.
+- Every value stays inside the inclusive endpoints, `[low, high]`; the authored direction controls linked pairing.
 - `max_index` is a cap, not a promise.
 - `rand(1, 5, 1, 10)` behaves like `rand(1, 5, 1)`.
 
@@ -473,9 +478,10 @@ name = value ; prefix ; unit
 ```text
 d = 5 ; ; "m"
 t = 2 ; ; "s"
-v = d / t ; ; "m/s"
+v = d / t
 E = 1500 ; "k" ; "J"
 A = s^{2} ; ; "u^2"
+R = pick(2, 4) ; ; "Ω"
 ```
 
 - Split on top-level `;`, respecting quotes and brackets.
@@ -504,10 +510,16 @@ A declared prefix changes the canonical magnitude, not just the display.
 
 - A literal magnitude is fixed.
 - `rand(...)` as the value field creates a randomized quantity magnitude.
+- `pick(...)` as the value field creates a drawable quantity magnitude, e.g.
+`R = pick(2, 4) ; ; "Ω"`. Every option must be a number or a numeric
+expression.
 - Any other value expression is evaluated with the numeric environment at
 session time; earlier numeric definitions may be used.
 - Quantity declarations do not enter the numeric environment, so numeric
 expressions cannot use them.
+- When the value expression already uses earlier quantity definitions, its unit
+comes from that arithmetic. Do **not** add an explicit `; ; "unit"` — it is
+redundant and fatal. Write `I = V / R`, not `I = V / R ; ; "A"`.
 - The shared expression criterion does **not** run on a quantity magnitude
 expression or on quantity arithmetic; an ambiguous magnitude there is accepted.
 
@@ -1428,12 +1440,13 @@ exactly under every mode; no other code is accepted.
 
 - Count significant figures in the typed magnitude text.
 - If count > `max-sigfigs`, reject.
+- Apply the **magnitude absolute tolerance**: normalize the expected answer to its display prefix/scientific representation at `min-sigfigs`, then take one unit of the last displayed digit. Example: `10.234 µA` has a `0.001 µA` step, or `1e-9 A` canonical. Accept when the typed and expected canonical values differ by at most that step.
 - If expected displayed value is zero, accept only within `1e-12`.
 - Else, for every precision from `min-sigfigs` upward to `max-sigfigs`, accept
 if the typed value equals the expected value **rounded** at that precision, or equals it **truncated toward zero** at that precision.
 - Else fail.
 
-Comparison uses display scale and offset, so prefixes and scientific notation do not change the outcome.
+Comparison uses display scale and offset, so prefixes and scientific notation do not change the outcome. The magnitude tolerance follows the normalized display: `10.234 µA`, `10.234e-6 A`, and `1.0234e-5 A` share the same canonical window.
 
 ### 21.5 Quantity fallback
 
@@ -1667,7 +1680,7 @@ renders typed even in a multiple-choice session.
 1. **Link groups.** Enumerate group offsets/indices, recompute the answer, add
 distinct values.
 2. **Single variables.** For each unlinked drawable numeric variable, try
-in-range values (up to 60 samples for large ranges) and six steps beyond each end, shuffled.
+in-range values only (up to 60 samples for large ranges), shuffled. A `rand()` range is a hard domain: auto-distractors never go below its `low` or above its `high` endpoint.
 3. **Random subsets.** Try two or more variables, pulling in link partners and
 alternate fixed/expression values; recompute.
 4. **Author blocks.** Use values extracted from `## DISTRACTORS`.
@@ -1697,7 +1710,7 @@ value; unparseable → literal text with a warning.
 3. **Display-grid deviations.** Displayed value ± k grid units for k in 1,2,3,5,
 10; percentages 1,2,5,10,20%; powers of ten −3…−1 and 1…3; adjacent significant-figure roundings; the negative displayed value.
 
-Every candidate is formatted through the answer's own policy, so a wrong choice never uses a different prefix convention or unit system. Dedup uses `TOLERANCE` and the formatted display key.
+Every candidate is formatted through the answer's own policy, so a wrong choice never uses a different prefix convention or unit system. Dedup uses the magnitude absolute tolerance (one last-displayed-digit step after prefix/scientific normalization) and the formatted display key. The old absolute canonical `TOLERANCE = 1e-3` no longer applies to quantity choices, so small values such as currents in `µA` keep their distinct pick-family distractors.
 
 Warnings:
 
@@ -1754,7 +1767,7 @@ skipped.
 
 ## 30. Fatal error catalogue
 
-A fatal error skips the whole note and appears in the Skipped Note panel.
+A fatal error skips the whole note and appears in the Skipped Note panel. The panel labels the failure type — **Definitions Error**, **Answers Error**, **Distractors Error**, **Answer Build Error**, **Note Structure Error**, or **General Error**. Build failures also include the last underlying cause after the summary message.
 
 ### 30.1 Structure
 
@@ -1804,7 +1817,6 @@ A fatal error skips the whole note and appears in the Skipped Note panel.
 | Ambiguous expression diagnostic | Numeric RHS/exprPick fails criterion |
 | `is not a finite number` | Computed expression NaN/Infinity |
 | `rand(): step must be > 0` | Invalid rand |
-| `rand(): max must be >= min` | Invalid range |
 | `rand(): max_index must be a positive integer` | Invalid cap |
 
 ### 30.3 Answers
@@ -1843,6 +1855,7 @@ A fatal error skips the whole note and appears in the Skipped Note panel.
 | `the answer is not a finite number for the generated values` | 50 draws failed |
 | `the answer is not a finite quantity for the generated values` | 50 quantity draws failed |
 | `the answer is not a finite quantity set for the generated values` | 50 multi-value draws failed |
+| `rv-def: "X" uses quantity definitions (…), so "…" already has a unit` | Explicit unit repeated on quantity arithmetic |
 | `could not resolve variables for this draw — try rescanning` | Text builder exhausted |
 | `rv-answer has no value binding` | No slots |
 
