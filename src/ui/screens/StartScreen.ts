@@ -27,6 +27,7 @@ import {
 import {
     attachAlertCopyButton,
     formatSkippedNotes,
+    skippedIssueLabel,
     formatWarningNotes,
 } from '../alertNotes';
 
@@ -222,7 +223,10 @@ export function renderStartScreen(props: StartScreenProps): void {
             createNoteLink(li, path);
             const sub = li.createEl('ul', { cls: 'rv-outline-sublist' });
             const subLi = sub.createEl('li');
-            subLi.createDiv({ cls: 'rv-outline-header', text: '## General Error' });
+            subLi.createDiv({
+                cls: 'rv-outline-header',
+                text: `## ${skippedIssueLabel(reason)}`,
+            });
             const msgList = subLi.createEl('ul', { cls: 'rv-outline-messages' });
             msgList.createEl('li', { cls: 'rv-outline-message', text: reason });
         }

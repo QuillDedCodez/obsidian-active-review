@@ -1,5 +1,9 @@
 import { test, assert } from './harness';
-import { formatSkippedNotes, formatWarningNotes } from '../src/ui/alertNotes';
+import {
+    formatSkippedNotes,
+    formatWarningNotes,
+    skippedIssueLabel,
+} from '../src/ui/alertNotes';
 import type { Warning } from '../src/parser';
 
 test('skipped notes copy keeps the count header and one bullet per note', () => {
@@ -12,7 +16,7 @@ test('skipped notes copy keeps the count header and one bullet per note', () => 
             '# Skipped Note — 1 note',
             '',
             '- [[review/rv-a.md]]',
-            '  - General Error: missing ## ANSWERS',
+            '  - Note Structure Error: missing ## ANSWERS',
         ].join('\n'),
     );
 });
@@ -33,6 +37,21 @@ test('skipped notes copy pluralizes and preserves order', () => {
             '  - General Error: empty section',
         ].join('\n'),
     );
+});
+
+test('skipped note labels identify the failing section or build stage', () => {
+    assert.equal(
+        skippedIssueLabel('rv-def: line 4: I = V / R — remove the explicit unit'),
+        'Definitions Error',
+    );
+    assert.equal(skippedIssueLabel('rv-answer: unknown key "foo"'), 'Answers Error');
+    assert.equal(skippedIssueLabel('rv-distract: anchor "x" is not defined'), 'Distractors Error');
+    assert.equal(
+        skippedIssueLabel('test: the answer is not a finite quantity set for the generated values'),
+        'Answer Build Error',
+    );
+    assert.equal(skippedIssueLabel('missing "## QUESTIONS" text'), 'Note Structure Error');
+    assert.equal(skippedIssueLabel('something else'), 'General Error');
 });
 
 test('warning copy totals every warning but counts notes separately', () => {

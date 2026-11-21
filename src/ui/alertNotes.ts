@@ -8,6 +8,23 @@
 import type { Warning } from '../parser';
 import { createCopyButton, type CopyButton } from './CopyButton';
 
+/**
+ * Short label for the kind of error that skipped a note. Parse errors carry
+ * their section prefix; build errors are grouped by what failed at build time.
+ */
+export function skippedIssueLabel(reason: string): string {
+    if (/\brv-answer\b/i.test(reason)) return 'Answers Error';
+    if (/\brv-distract\b/i.test(reason)) return 'Distractors Error';
+    if (/\brv-def\b/i.test(reason) || /definitions block/i.test(reason)) return 'Definitions Error';
+    if (/the answer is not a finite|requires an answerSpec|has no answer variants|could not resolve variables|has no value binding/i.test(reason)) {
+        return 'Answer Build Error';
+    }
+    if (/missing ["']?## (?:QUESTIONS|ANSWERS|DEFINITIONS)|not a quiz note|inside the session|frontmatter/i.test(reason)) {
+        return 'Note Structure Error';
+    }
+    return 'General Error';
+}
+
 /** `# Skipped Note — 2 notes` plus one wiki-linked bullet per note. */
 export function formatSkippedNotes(issues: readonly [string, string][]): string {
     const count = issues.length;
@@ -17,7 +34,7 @@ export function formatSkippedNotes(issues: readonly [string, string][]): string 
     ];
     for (const [path, reason] of issues) {
         lines.push(`- [[${path}]]`);
-        lines.push(`  - General Error: ${reason}`);
+        lines.push(`  - ${skippedIssueLabel(reason)}: ${reason}`);
     }
     return lines.join('\n');
 }
