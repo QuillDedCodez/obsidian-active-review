@@ -5,3 +5,4 @@ tests/.build/
 .eslint-report.json
 data.json
 *Zone.Identifier
+*.code-workspace
