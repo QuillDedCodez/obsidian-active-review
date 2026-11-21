@@ -309,13 +309,14 @@ export function atomOf(expr: UnitExpr): UnitFactor | null {
 }
 
 /**
- * Map a compound expression to a named derived unit when its dimension and
- * scale match one exactly. `kg*m/s^2` becomes `N`; `m^2` stays compound.
+ * Map a compound expression to a named unit when its dimension and scale match
+ * one exactly. `kg*m/s^2` becomes `N` and `V/Ω` becomes `A`; `m^2` stays
+ * compound.
  */
 export function namedUnitFor(expr: UnitExpr): UnitExpr | null {
     if (expr.factors.length === 1 && expr.factors[0]!.exponent === 1) return expr;
     for (const candidate of SI_UNITS) {
-        if (candidate.kind !== 'derived') continue;
+        if (candidate.kind !== 'derived' && candidate.kind !== 'base') continue;
         if (candidate.namespace !== expr.namespace) continue;
         if (candidate.scale !== expr.scale) continue;
         if (!dimEquals(candidate.dim, expr.dim)) continue;

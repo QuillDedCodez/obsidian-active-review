@@ -35,18 +35,21 @@ export function buildQuantityQuestion(
     let given: Record<string, Value> = {};
     let resolved: Resolved = { values: {}, sources: {}, displaySources: {} };
     let answer: ResolvedQuantityAnswer | undefined;
+    let lastError: Error | undefined;
 
     for (let tries = 0; tries < 50 && answer === undefined; tries++) {
         given = drawAll(randomDefs, q.links, drawsRng);
         try {
             resolved = resolve(q.vars, given);
             answer = resolveAnswer(spec, resolved.values);
-        } catch {
+        } catch (e) {
             answer = undefined;
+            lastError = e instanceof Error ? e : new Error(String(e));
         }
     }
     if (answer === undefined) {
-        throw new Error('the answer is not a finite quantity for the generated values');
+        const detail = lastError?.message ? ` — ${lastError.message}` : '';
+        throw new Error(`the answer is not a finite quantity for the generated values${detail}`);
     }
 
     // The bound value renders as its formatted quantity in every section, so

@@ -204,7 +204,7 @@ export function effectiveCount(d: VarDef): number {
         return d.values?.length ?? 0;
     }
     if (d.kind === 'rand') {
-        const fullLength = Math.floor((d.last - d.first) / d.step + 1e-9) + 1;
+        const fullLength = Math.floor(Math.abs(d.last - d.first) / d.step + 1e-9) + 1;
         return d.max_index !== undefined ? Math.min(d.max_index, fullLength) : fullLength;
     }
     return 0;
@@ -304,7 +304,6 @@ function parseRand(
         throw new Error(`${where}: rand(): all parameters must be numbers`);
     }
     if (step <= 0) throw new Error(`${where}: rand(): step must be > 0`);
-    if (last < first) throw new Error(`${where}: rand(): max must be >= min`);
     let max_index: number | undefined;
     if (r[4] !== undefined) {
         const n = Number(r[4]);
@@ -626,12 +625,35 @@ export function parseVars(
             }
 
             const rand = parseRand(valueText, where);
+            const pick = rand === null ? /^pick\((.+)\)$/.exec(valueText) : null;
+            let pickValues: string[] | undefined;
+            if (pick) {
+                const parsed = parsePickArgs(pick[1] ?? '', where, name);
+                if (parsed.some((part) => part.kind === 'str')) {
+                    throw new Error(
+                        `${where}: ${name}: pick() for a quantity value must contain numbers or expressions, not strings`,
+                    );
+                }
+                pickValues = parsed.map((part) => String(part.value));
+                for (const expr of pickValues) {
+                    const substituted = substituteForEval(
+                        expr,
+                        env,
+                        stringNames,
+                        `${where}: pick() for ${name}`,
+                    );
+                    const value = evalIn(substituted, env, stringNames, `${where}: pick() for ${name}`);
+                    if (!Number.isFinite(value)) {
+                        throw new Error(`${where}: ${name}: pick() option "${expr}" is not a finite number`);
+                    }
+                }
+            }
             const base = {
                 name,
                 first: 0,
                 last: 0,
                 step: 1,
-                fixed: rand === null,
+                fixed: rand === null && pick === null,
                 valueType: 'quantity' as const,
                 dependencies,
                 quantity: {
@@ -652,6 +674,17 @@ export function parseVars(
                     step: rand.step,
                     fixed: false,
                     ...(rand.max_index !== undefined ? { max_index: rand.max_index } : {}),
+                });
+            } else if (pickValues) {
+                pushOrReplace({
+                    ...base,
+                    kind: 'exprPick',
+                    values: pickValues,
+                    fixed: false,
+                    dependencies: extractDependencies(
+                        pickValues.join(' '),
+                        new Set([...Object.keys(env), ...byName.keys()]),
+                    ),
                 });
             } else {
                 pushOrReplace({ ...base, kind: 'expr', expr: valueText });
@@ -1136,7 +1169,7 @@ export function validateLinks(links: string[][], defs: VarDef[]): void {
             if (
                 d.kind === 'expr' ||
                 d.kind === 'display' ||
-                (d.valueType === 'quantity' && d.kind !== 'quantityPick')
+                (d.valueType === 'quantity' && d.kind !== 'quantityPick' && d.kind !== 'exprPick')
             ) {
                 throw new Error(`rv-def: link(${label}): "${name}" is a computed value, not a drawable set`);
             }
@@ -1160,8 +1193,8 @@ export function validateLinks(links: string[][], defs: VarDef[]): void {
             for (let i = 1; i < randMembers.length; i++) {
                 const m = randMembers[i]!;
                 const same =
-                    m.first === ref.first &&
-                    m.last === ref.last &&
+                    Math.min(m.first, m.last) === Math.min(ref.first, ref.last) &&
+                    Math.max(m.first, m.last) === Math.max(ref.first, ref.last) &&
                     m.step === ref.step &&
                     m.max_index === ref.max_index;
                 if (!same) {

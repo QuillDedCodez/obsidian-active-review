@@ -23,18 +23,21 @@ export function buildNumericQuestion(
     let given: Record<string, Value> = {};
     let resolved: Resolved = { values: {}, sources: {}, displaySources: {} };
     let correct = NaN;
+    let lastError: Error | undefined;
 
     for (let tries = 0; tries < 50 && !Number.isFinite(correct); tries++) {
         given = drawAll(randomDefs, q.links, drawsRng);
         try {
             resolved = resolve(q.vars, given);
             correct = computeAnswer(q, resolved.values);
-        } catch {
+        } catch (e) {
             correct = NaN;
+            lastError = e instanceof Error ? e : new Error(String(e));
         }
     }
     if (!Number.isFinite(correct)) {
-        throw new Error('the answer is not a finite number for the generated values');
+        const detail = lastError?.message ? ` — ${lastError.message}` : '';
+        throw new Error(`the answer is not a finite number for the generated values${detail}`);
     }
 
     const correctNumbers: number[] = [];

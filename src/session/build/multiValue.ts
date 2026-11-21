@@ -30,6 +30,7 @@ export function buildMultiValueQuestion(
     let given: Record<string, Value> = {};
     let resolved: Resolved = { values: {}, sources: {}, displaySources: {} };
     let slots: ResolvedSlot[] | undefined;
+    let lastError: Error | undefined;
 
     for (let tries = 0; tries < 50 && slots === undefined; tries++) {
         given = drawAll(randomDefs, q.links, drawsRng);
@@ -48,12 +49,16 @@ export function buildMultiValueQuestion(
             });
             resolved = candidate;
             slots = resolvedSlots;
-        } catch {
+        } catch (e) {
             slots = undefined;
+            lastError = e instanceof Error ? e : new Error(String(e));
         }
     }
     if (slots === undefined) {
-        throw new Error('the answer is not a finite quantity set for the generated values');
+        const detail = lastError?.message ? ` — ${lastError.message}` : '';
+        throw new Error(
+            `the answer is not a finite quantity set for the generated values${detail}`,
+        );
     }
 
     const texts: Record<string, FormattedValue> = {};

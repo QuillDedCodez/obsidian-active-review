@@ -100,10 +100,39 @@ export function resolve(defs: VarDef[], given: Record<string, Value>): Resolved 
             if (d.kind === 'rand') {
                 magnitude =
                     typeof given[d.name] === 'number' ? (given[d.name] as number) : d.first;
+            } else if (d.kind === 'exprPick' && (d.values?.length ?? 0) > 0) {
+                const rawIndex = given[d.name];
+                const index = typeof rawIndex === 'number' ? rawIndex : 0;
+                const values = d.values ?? [];
+                const rawPicked = values[index] ?? values[0];
+                const picked = typeof rawPicked === 'string' ? rawPicked : '0';
+                magnitude = evaluate(substituteForEval(picked, numeric), numeric);
             } else if (spec.fixedValue !== undefined) {
                 magnitude = spec.fixedValue;
             } else {
-                magnitude = evaluate(substituteForEval(spec.valueExpr, numeric), numeric);
+                const quantityOperands = (d.dependencies ?? []).filter(
+                    (name) => defs.find((def) => def.name === name)?.valueType === 'quantity',
+                );
+                if (quantityOperands.length > 0) {
+                    // The value expression may already produce a quantity. An
+                    // explicit unit is then redundant and cannot be combined.
+                    const result = evaluateQuantityExpression(spec.valueExpr, values);
+                    if (isQuantityValue(result)) {
+                        throw new Error(
+                            `rv-def: "${d.name}" uses quantity definitions (${quantityOperands.join(', ')}), ` +
+                                `so "${spec.valueExpr}" already has a unit. ` +
+                                `Remove the explicit unit and write ${d.name} = ${spec.valueExpr}.`,
+                        );
+                    }
+                    if (typeof result !== 'number' || !Number.isFinite(result)) {
+                        throw new Error(
+                            `rv-def: "${d.name}" = ${spec.valueExpr} is not a finite number`,
+                        );
+                    }
+                    magnitude = result;
+                } else {
+                    magnitude = evaluate(substituteForEval(spec.valueExpr, numeric), numeric);
+                }
             }
 
             let prefix = spec.prefix ? findPrefix(spec.prefix) : undefined;

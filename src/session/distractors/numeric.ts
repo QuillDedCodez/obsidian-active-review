@@ -17,9 +17,9 @@ import { fmt } from '../../math';
 import { evaluateExpression } from '../../math/symbolic';
 import {
     MAX_ALTERNATIVES,
-    beyondRange,
     buildMaxIndexSample,
     inRange,
+    randAt,
     round,
     sampleIndices,
 } from '../draws';
@@ -227,7 +227,7 @@ export function buildNumericDistractors(
                     // `drawAll`, so a candidate keeps the declared pairing.
                     const memberIdx = m.flip ? count - 1 - idx : idx;
                     let newVal: Value;
-                    if (def.kind === 'rand') newVal = round(def.first + def.step * (offset + memberIdx * gap));
+                    if (def.kind === 'rand') newVal = randAt(def, offset + memberIdx * gap);
                     else if (def.kind === 'pick' || def.kind === 'stringPick') newVal = def.values![memberIdx] ?? 0;
                     else if (def.kind === 'exprPick') newVal = memberIdx;
                     else continue;
@@ -244,7 +244,7 @@ export function buildNumericDistractors(
         pool
             .filter((d) => !inGroup.has(d.name) && d.kind !== 'stringPick')
             .flatMap((d) =>
-                [...inRange(d, rng), ...beyondRange(d)]
+                inRange(d, rng)
                     .filter((v) => v !== given[d.name])
                     .map((v) => ({ d, v })),
             ),
@@ -282,7 +282,7 @@ export function buildNumericDistractors(
                 while (next === given[n] && guard++ < 5) next = Math.floor(rng() * vals.length);
                 override[n] = next;
             } else if (d.kind === 'fixed' || d.kind === 'expr') {
-                const opts = [...inRange(d, rng), ...beyondRange(d)].filter((v) => v !== given[n]);
+                const opts = inRange(d, rng).filter((v) => v !== given[n]);
                 if (opts.length === 0) continue;
                 override[n] = opts[Math.floor(rng() * opts.length)] ?? 0;
             }

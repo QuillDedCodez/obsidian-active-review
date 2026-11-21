@@ -64,13 +64,33 @@ export function buildMaxIndexSample(
     step: number,
     k: number,
 ): { gap: number; max_offset: number; count: number } {
-    const n = Math.floor((last - first) / step + 1e-9) + 1;
+    const low = Math.min(first, last);
+    const high = Math.max(first, last);
+    const n = Math.floor((high - low) / step + 1e-9) + 1;
     const kk = Math.min(k, n);
     if (kk === n) return { gap: 1, max_offset: 0, count: n };
     if (kk === 1) return { gap: 0, max_offset: n - 1, count: 1 };
     const gap = Math.floor((n - 1) / (kk - 1));
     const max_offset = (n - 1) - (kk - 1) * gap;
     return { gap, max_offset, count: kk };
+}
+
+/** Authored first-to-last direction. Decreasing ranges are allowed. */
+export function randDirection(d: VarDef): 1 | -1 {
+    return d.last < d.first ? -1 : 1;
+}
+
+export function randLow(d: VarDef): number {
+    return Math.min(d.first, d.last);
+}
+
+export function randHigh(d: VarDef): number {
+    return Math.max(d.first, d.last);
+}
+
+/** Value at a zero-based position from the authored `first` endpoint. */
+export function randAt(d: VarDef, position: number): number {
+    return round(d.first + randDirection(d) * d.step * position);
 }
 
 function stepCount(d: VarDef): number {
@@ -80,7 +100,7 @@ function stepCount(d: VarDef): number {
     ) {
         return d.values.length - 1;
     }
-    return d.fixed ? 0 : Math.floor((d.last - d.first) / d.step + 1e-9);
+    return d.fixed ? 0 : Math.floor(Math.abs(d.last - d.first) / d.step + 1e-9);
 }
 
 function draw(d: VarDef, rng: () => number): Value {
@@ -102,9 +122,9 @@ function draw(d: VarDef, rng: () => number): Value {
         const { gap, max_offset, count } = buildMaxIndexSample(d.first, d.last, d.step, d.max_index);
         const offset = uniformInclusive(0, max_offset, rng);
         const idx = uniformInclusive(0, count - 1, rng);
-        return round(d.first + d.step * (offset + idx * gap));
+        return randAt(d, offset + idx * gap);
     }
-    return round(d.first + uniformInclusive(0, stepCount(d), rng) * d.step);
+    return randAt(d, uniformInclusive(0, stepCount(d), rng));
 }
 
 /** Draw every random variable, honouring link groups (one index shared across members). */
@@ -149,7 +169,7 @@ export function drawAll(
             // value pairs with the leader's last, and so on.
             const memberIdx = m.flip ? count - 1 - idx : idx;
             if (def.kind === 'rand') {
-                drawn[def.name] = round(def.first + def.step * (offset + memberIdx * gap));
+                drawn[def.name] = randAt(def, offset + memberIdx * gap);
             } else if (
                 def.kind === 'pick' ||
                 def.kind === 'stringPick' ||
@@ -185,29 +205,18 @@ export function inRange(d: VarDef, rng: () => number): number[] {
     }
     const n = stepCount(d);
     if (n < MAX_ALTERNATIVES) {
-        return Array.from({ length: n + 1 }, (_, k) => round(d.first + k * d.step));
+        return Array.from({ length: n + 1 }, (_, k) => randAt(d, k));
     }
     const picks = new Set<number>();
     // Bounded sampling: rounding collisions must not turn this into a spin.
     for (let attempts = 0; attempts < MAX_ALTERNATIVES * 10 && picks.size < MAX_ALTERNATIVES; attempts++) {
-        picks.add(round(d.first + Math.floor(rng() * (n + 1)) * d.step));
+        picks.add(randAt(d, Math.floor(rng() * (n + 1))));
     }
     if (picks.size < MAX_ALTERNATIVES) {
         const stride = Math.max(1, Math.floor((n + 1) / MAX_ALTERNATIVES));
         for (let k = 0; k <= n && picks.size < MAX_ALTERNATIVES; k += stride) {
-            picks.add(round(d.first + k * d.step));
+            picks.add(randAt(d, k));
         }
     }
     return [...picks];
-}
-
-/** Numeric candidates just outside the declared range — deterministic. */
-export function beyondRange(d: VarDef): number[] {
-    if (d.kind === 'exprPick') return [];
-    if (d.kind === 'pick' || d.kind === 'stringPick' || d.kind === 'unit' || d.kind === 'prefix' || d.kind === 'quantityPick') {
-        return [];
-    }
-    const out: number[] = [];
-    for (let k = 1; k <= 6; k++) out.push(round(d.last + k * d.step), round(d.first - k * d.step));
-    return out;
 }
