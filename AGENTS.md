@@ -37,6 +37,39 @@ Rules:
 - Do not hand-edit generated `main.js`. Rebuild it instead.
 - Remove Windows `*:Zone.Identifier` files before committing; they are metadata,
   not project files.
+- This folder is standalone and **must not** contain `openCodeScripts/`,
+  `tree.*`, or dev-only npm scripts (`build:inplace`, `build:validator`,
+  `typecheck:validator`). No `package.json` script may reference
+  `openCodeScripts`.
+- `npm run verify` here is `typecheck && lint && test`; it must never require the
+  dev-only validator type-check.
+- If `npm run verify` fails with
+  `TS5058: The specified path does not exist: 'openCodeScripts/validator/tsconfig.json'`,
+  do not create that folder here. Fix the sync build in `dev-active-review/` and
+  re-sync the submission instead.
+
+## Folder isolation
+
+`obsidian-active-review/` is generated output, not a second development folder.
+The source of truth is `dev-active-review/`; its sync build strips the dev-only
+material before copying. Expected differences:
+
+| Material | `dev-active-review/` | Here |
+|---|---|---|
+| `openCodeScripts/` | Yes | **Never** |
+| `tree.md` / `tree.py` / `tree.txt` | Yes | **Never** |
+| `build:inplace`, `build:validator`, `typecheck:validator` scripts | Yes | **Never** |
+| `dev Plugin Docs/` source | Yes | Generated `Plugin Docs/` only |
+| `scripts/build-submission.mjs` | Yes | Yes — the only script |
+| `node_modules/`, `tests/.build/` | Local only | **Never** |
+
+Quick audit of this folder:
+
+```bash
+test ! -e openCodeScripts && echo "no openCodeScripts"
+test "$(ls scripts)" = "build-submission.mjs" && echo "scripts OK"
+node -e 'const s=require("./package.json").scripts; const bad=Object.entries(s).filter(([,v])=>/openCodeScripts/.test(v)); if(bad.length){console.error(bad);process.exit(1)}; console.log("no dev script leaks")'
+```
 
 ## Build workflow
 
@@ -51,11 +84,17 @@ npm run build
 published repository. It runs on Windows, macOS, and Linux and does not copy
 files to other folders or manage docs:
 
-1. Checks Node 18+/npm and `package-lock.json`; auto-runs
+1. Checks folder isolation: no `openCodeScripts/`, no dev-only scripts, and no
+   `openCodeScripts` reference in `package.json` or `scripts/`.
+2. Checks Node 18+/npm and `package-lock.json`; auto-runs
    `npm ci --ignore-scripts --no-audit --no-fund` if `node_modules` is missing.
-2. Audits production dependencies (`npm audit --omit=dev --audit-level=high`).
-3. Runs `npm run verify` (type-check, lint, and tests).
-4. Bundles production `main.js` and checks artifacts.
+3. Audits production dependencies (`npm audit --omit=dev --audit-level=high`).
+4. Runs `npm run verify` (type-check, lint, and tests).
+5. Bundles production `main.js` and checks artifacts.
+
+If the isolation check fails, do not patch this folder. Fix the dev sync build
+and re-sync, or restore the standalone `package.json` and `scripts/` exactly as
+this guide describes.
 
 The folder can be copied to another machine and built independently.
 

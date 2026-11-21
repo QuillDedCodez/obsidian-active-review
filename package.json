@@ -7,12 +7,9 @@
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "node scripts/build-submission.mjs",
-		"build:inplace": "node scripts/build-submission.mjs",
 		"build:bundle": "node esbuild.config.mjs production",
-		"build:validator": "node openCodeScripts/build-validator.mjs",
-		"verify": "npm run typecheck && npm run typecheck:validator && npm run lint && npm test",
+		"verify": "npm run typecheck && npm run lint && npm test",
 		"typecheck": "tsc -noEmit -skipLibCheck",
-		"typecheck:validator": "tsc -p openCodeScripts/validator/tsconfig.json",
 		"test": "tsc -p tests/tsconfig.json && node --require ./tests/register.cjs tests/run.cjs",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"lint": "eslint src"

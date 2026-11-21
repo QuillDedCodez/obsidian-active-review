@@ -76,6 +76,41 @@ const npmVersion = npmSpawn(['--version'], { encoding: 'utf8', stdio: 'pipe' });
 if (npmVersion.error || npmVersion.status !== 0) fail('npm is not available on PATH');
 console.log(`node ${process.version} / npm ${String(npmVersion.stdout).trim()} / ${process.platform}`);
 
+step('Checking folder isolation');
+{
+    // This folder is the standalone submission repository. Dev/OpenCode-only
+    // material must never leak in, or `npm run verify` breaks here later.
+    const pkgPath = path.join(ROOT, 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    const problems = [];
+
+    for (const devOnly of ['build:inplace', 'build:validator', 'typecheck:validator']) {
+        if (Object.hasOwn(pkg.scripts ?? {}, devOnly)) {
+            problems.push(`dev-only script "${devOnly}" must be removed from package.json`);
+        }
+    }
+    for (const [name, command] of Object.entries(pkg.scripts ?? {})) {
+        if (String(command).includes('openCodeScripts')) {
+            problems.push(`script "${name}" references openCodeScripts (folder not present)`);
+        }
+    }
+    if (fs.existsSync(path.join(ROOT, 'openCodeScripts'))) {
+        problems.push('openCodeScripts/ must not exist in the standalone submission folder');
+    }
+    const scriptsDir = path.join(ROOT, 'scripts');
+    if (fs.existsSync(scriptsDir)) {
+        const stray = fs.readdirSync(scriptsDir).filter((name) => name !== 'build-submission.mjs');
+        if (stray.length) problems.push(`scripts/ contains non-submission files: ${stray.join(', ')}`);
+    }
+
+    if (problems.length) {
+        fail(
+            `folder is not isolated; fix it in dev-active-review/ and re-sync:\n - ${problems.join('\n - ')}`,
+        );
+    }
+    console.log('standalone submission: no dev-only scripts or folders');
+}
+
 step('Installing dependencies');
 if (!fs.existsSync(path.join(ROOT, 'node_modules'))) {
     // Exact-lockfile install with integrity checks; install scripts stay blocked.
